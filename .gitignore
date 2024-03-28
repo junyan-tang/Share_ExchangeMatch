@@ -1,0 +1,17 @@
+# Ignore Gradle project-specific cache directory
+cmake-build-debug
+CMakeLists.txt
+
+
+# Ignore Gradle build output directory
+
+# Ignore backup and lock files
+*~
+\#*
+
+# Ignore vscode setting
+.vscode/settings.json
+
+# Ignore intelliJ setting
+.idea/misc.xml
+.idea/modules.xml
