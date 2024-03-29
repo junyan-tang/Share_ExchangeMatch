@@ -1,8 +1,9 @@
 #include "server.hpp"
 #include <cstring>
 #include <iostream>
+#include <vector>
 
-using namespace std;
+
 
 
 Server::Server() {
@@ -49,9 +50,53 @@ Server::Server() {
 
 void Server::run() {
   while (true) {
+    cout << "watting for connection" << endl;
     process();
   }
 }
+
+
+string rece_request(int new_fd) {
+
+    char buf[1024];
+    memset(buf, 0, 1024); 
+
+    string data;
+    size_t totalBytesReceived = 0;
+    bool headerParsed = false;
+    size_t expectedLength = 0; 
+
+    while (true) {
+        int bytesReceived = recv(new_fd, buf, 1024, 0);
+
+        if (bytesReceived == -1) {
+            cerr << "Error: recv failed" << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        data.append(buf, bytesReceived);
+        totalBytesReceived += bytesReceived;
+
+        if (!headerParsed) {
+            size_t endOfLength = data.find("\n");
+            if (endOfLength != string::npos) {
+                expectedLength = stoull(data.substr(0, endOfLength));
+                headerParsed = true;
+                data.erase(0, endOfLength + 1); 
+                totalBytesReceived -= (endOfLength + 1); 
+            }
+        }
+
+        if (headerParsed && (totalBytesReceived >= expectedLength || data.find("</create>") != string::npos)) {
+            break; 
+        }
+
+        memset(buf, 0, bytesReceived);
+    }
+
+    return data;
+}
+
 
 void Server::process() {
   sin_size = sizeof(their_addr);
@@ -61,30 +106,15 @@ void Server::process() {
     exit(EXIT_FAILURE);
   }
 
-  char buf[1024];
-  int numbytes = recv(new_fd, buf, 1024, 0);
-  if (numbytes == -1) {
-    cerr << "Error: recv fail" << endl;
-    exit(EXIT_FAILURE);
-  }
+  string data = rece_request(new_fd);
 
-  buf[numbytes] = '\0';
-  cout << "Received: " << buf << endl;
+  cout << "receive data in server: " << data << endl;
 
   close(new_fd);
+  
 }
 
-string Server::recv_request(int new_fd) {
-    string res;
-    char buffer[1024];
-    size_t expect_bytes = recv(new_fd, &(buffer[0]), 1024, 0);
-
-    size_t cur_bytes;
-
-
-
-    
-    return res;
-
-
+Server::~Server() {
+  freeaddrinfo(host_list);
+  close(server_sockfd);
 }

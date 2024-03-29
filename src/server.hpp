@@ -1,9 +1,13 @@
+#ifndef SERVER_HPP
+#define SERVER_HPP
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <string>
 
-
+using namespace std;
 #define PORT "12345"
 class Server{
 private:
@@ -30,3 +34,5 @@ public:
 
 
 };
+
+#endif // SERVER_HPP

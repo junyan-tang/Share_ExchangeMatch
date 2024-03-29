@@ -2,7 +2,6 @@
 #define HELPER_HPP
 
 #include <pqxx/pqxx>
-#include "sql_init/Database.h"
 #include <string>
 
 using namespace std;
