@@ -11,9 +11,9 @@ struct Account {
 };
 
 struct Stock {
-    string stock_id;
+    string sym;
     string account_id;
-    int num;
+    int amount;
 };
 
 struct Order {

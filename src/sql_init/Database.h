@@ -5,11 +5,6 @@
 #ifndef SHARE_EXCHANGEMATCH_DATABASE_H
 #define SHARE_EXCHANGEMATCH_DATABASE_H \
 
-
-
-
-
-
 class Database {
 private:
     connection *c;
@@ -50,10 +45,7 @@ public:
 
 
 
-    }
-
-
-};
+    };
 
 
 
