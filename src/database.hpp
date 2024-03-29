@@ -36,5 +36,6 @@ class Database{
     void delete_transaction(connection *C, string transaction_id);
 
     
+    void show_table(connection *C, string table_name);
 };
 

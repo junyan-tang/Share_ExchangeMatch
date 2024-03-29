@@ -7,11 +7,11 @@
 void Database::drop_table(connection *C){
     cout << "Dropping table" << endl;
 
-    //drop User, Share, Order
-    string sql = "DROP TABLE IF EXISTS User; DROP TABLE IF EXISTS SHARE; DROP TABLE IF EXISTS Order;";
 
     work W(*C);
-    W.exec(sql);
+    W.exec("DROP TABLE IF EXISTS \"User\";");
+    W.exec("DROP TABLE IF EXISTS SHARE;");
+    W.exec("DROP TABLE IF EXISTS \"Order\";");
     W.commit();
     
 
@@ -59,7 +59,9 @@ void Database::create_table(connection *C){
 
 void Database::init_database(connection *C){
     cout << "Initializing database" << endl;
+    cout << "drop first exist" << endl;
     drop_table(C);
+    cout << "create new table" << endl;
     create_table(C);
     cout << "finish init database" << endl;
 }
@@ -183,6 +185,23 @@ void Database::delete_transaction(connection *C, string transaction_id){
     work W(*C);
     W.exec(sql);
     W.commit();
+}
+
+void Database::show_table(connection *C, string table){
+
+    string sql = "SELECT * FROM " + table + ";";
+    work W(*C);
+    result R = W.exec(sql);
+    W.commit();
+    cout << "Table: " << table << endl;
+    for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+        cout << "row: ";
+        for (auto i = c.begin(); i != c.end(); ++i) {
+            cout << i->c_str() << " ";
+        }
+        cout << endl;
+    }
+
 }
 
 
