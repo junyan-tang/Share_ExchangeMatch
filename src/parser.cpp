@@ -21,7 +21,7 @@ void XMLParser::processCreate(const pugi::xml_node &node){
     for(pugi::xml_node account : node.children("account")){
         string account_id = account.attribute("id").value();
         string balance = account.attribute("balance").value();
-        Account acc = {account_id, balance}; 
+        creator.createAccount(account_id, balance);
     }
 
     for(pugi::xml_node symbol : node.children("symbol")) {
@@ -29,7 +29,7 @@ void XMLParser::processCreate(const pugi::xml_node &node){
         for (pugi::xml_node acc : symbol.children("account")) {
             string account_id = acc.attribute("id").value();
             int amount = stoi(acc.child_value());
-            Stock stock = {sym, account_id, amount};
+            creator.createStock(sym, account_id, amount);
         }
     }
 }
@@ -45,7 +45,7 @@ void XMLParser::processTransaction(const pugi::xml_node &node){
         while (trans_type){
             if (string(trans_type.name()) == "order"){
                 string sym = trans_type.attribute("sym").value();
-                int amount = stoi(trans_type.attribute("amount").value());
+                string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
             }
             else if (string(trans_type.name()) == "cancel") {
@@ -81,8 +81,8 @@ string XMLParser::responseForCreate(){
     }
 }
 
-string XMLParser::responseForTransaction(){
-    vector<string> results;
+string XMLParser::responseForTransaction(result R){
+    result results;
     pugi::xml_document doc;
     auto root = doc.append_child("results");
 
