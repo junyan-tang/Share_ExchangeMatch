@@ -1,5 +1,5 @@
 #include "server.hpp"
-
+#include "parser.hpp"
 
 
 
@@ -101,6 +101,8 @@ string rece_request(int new_fd) {
 void Server::process() {
   sin_size = sizeof(their_addr);
   int new_fd = accept(server_sockfd, (struct sockaddr *)&their_addr, &sin_size);
+
+
   if (new_fd == -1) {
     cerr << "Error: accept fail" << endl;
     exit(EXIT_FAILURE);
@@ -109,12 +111,15 @@ void Server::process() {
   string data = rece_request(new_fd);
 
   cout << "receive data in server: " << data << endl;
+  XMLParser parser;
 
   string re = parser.parseRequest(data);
 
-
   cout << "here is response: " << re << endl;
 
+
+  db.show_table("account");
+  db.show_table("share");
 
   close(new_fd);
   

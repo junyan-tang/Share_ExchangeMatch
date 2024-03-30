@@ -20,7 +20,7 @@ private:
 
 
     XMLParser parser;
-
+    Database db;
     int server_sockfd;
     int status;
     struct addrinfo host;

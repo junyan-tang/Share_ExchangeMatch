@@ -9,11 +9,15 @@
 using namespace std;
 class XMLParser {
 private:
-    Creation creator;
+
     //Transact transactor;
 
 
 public:
+    Creation creator;
+    connection * C = root_connection;
+
+
     string parseRequest(string xml);
     vector<ResultC> processCreate(const pugi::xml_node &node);
     //vector<ResultT> processTransaction(const pugi::xml_node &node);

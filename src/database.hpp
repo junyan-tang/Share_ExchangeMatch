@@ -5,7 +5,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
 #include <fstream>
-
+#include "global_var.hpp"
 
 using namespace std;
 using namespace pqxx;
@@ -14,7 +14,7 @@ class Database{
 
 
 public:
-    connection *C;
+    connection *C = root_connection;
     void drop_table();
     void create_table();
     void init_database();

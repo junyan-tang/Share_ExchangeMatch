@@ -19,9 +19,9 @@ using namespace pqxx;
 // };
 
 class Creation {
-private:
-    Database db;
 public:
+    Database db;
+    
     ResultC createAccount(string account_id, string balance);
     ResultC createStock(string sym, string account_id, double amount);
 };
