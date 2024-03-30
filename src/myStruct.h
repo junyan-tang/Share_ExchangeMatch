@@ -6,8 +6,6 @@
 #include <vector>
 using namespace std;
 
-
-
 struct Order {
     string stock_id;
     string account_id;
@@ -36,7 +34,7 @@ struct ResultC {
 struct ResultT{
     string account_id;
     string transaction_type;
-    string transaction_id;
+    int transaction_id;
     string sym;
     string status;
     string message;

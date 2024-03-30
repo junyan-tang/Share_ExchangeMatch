@@ -8,15 +8,15 @@
 using namespace std;
 using namespace pqxx;
 
-// class Transact {
-// private:
-//     Database db;
-// public:
-//     void openOrder(string account_id, string stock_id, string amount, string limit);
-//     void cancelOrder(string transaction_id);
-//     void queryOrder(string transaction_id);
-//     bool checkAccount(string account_id);
-// };
+class Transact {
+private:
+    Database db;
+public:
+    ResultT openOrder(string account_id, string stock_id, string amount, string limit, int trans_id);
+    ResultT cancelOrder(int trans_id);
+    ResultT queryOrder(int trans_id);
+    bool checkAccount(string account_id);
+};
 
 class Creation {
 public:

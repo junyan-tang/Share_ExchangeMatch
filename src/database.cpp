@@ -69,9 +69,9 @@ void Database::init_database(){
     cout << "finish init database" << endl;
 }
 
-void Database::insert_account(string account_id, string balance){
+void Database::insert_account(string account_id, double balance){
     cout << "Inserting account" << endl;
-    string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES ('" + account_id + "', " + balance + ");";
+    string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES ('" + account_id + "', " + to_string(balance) + ");";
     work W(*C);
     W.exec(sql);
     W.commit();
@@ -114,9 +114,9 @@ void Database::insert_transaction(string transaction_id, string account_id, stri
 }
 
 
-void Database::update_account(string account_id, string balance){
+void Database::update_account(string account_id, double balance){
     cout << "Updating account" << endl;
-    string sql = "UPDATE ACCOUNT SET BALANCE = " + balance + " WHERE ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE ACCOUNT SET BALANCE = " + to_string(balance) + " WHERE ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
