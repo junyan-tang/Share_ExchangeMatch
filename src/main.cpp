@@ -13,7 +13,7 @@ int main(){
 
     Database db;
     cout << "init main database" << endl;
-    db.init_database(C);
+    db.init_database();
     cout << "finish init main database" << endl;
     // cout << "create server" << endl;
     // Server server;

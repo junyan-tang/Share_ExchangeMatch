@@ -24,5 +24,14 @@ struct Order {
     string order_time; 
 };
 
+struct Transaction {
+    string stock_id;
+    string account_id;
+    int num;
+    double price;
+    string order_time; 
+    string status;
+};
+
 
 #endif

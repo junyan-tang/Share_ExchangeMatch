@@ -17,7 +17,7 @@ public:
     void add_sell_order(Order order);
     void add_buy_order(Order order);
 
-    void match_sell(Order order);
+    Transaction match_sell();
 
     void update_sell_orders(Order new_order);
     void update_buy_orders(Order new_order);
