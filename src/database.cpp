@@ -47,7 +47,7 @@ void Database::create_table(){
 
 
     sql += "CREATE TABLE TRANSACTION("
-            "TRANSACTION_ID TEXT PRIMARY KEY NOT NULL,"
+            "TRANSACTION_ID INT NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "SHARE_ID TEXT REFERENCES SHARE(SHAREID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
@@ -105,9 +105,9 @@ void Database::insert_buy_order(string stock_id, string account_id, double num, 
     W.commit();
 }
 
-void Database::insert_transaction(string transaction_id, string account_id, string stock_id, double num, double price, string status){
+void Database::insert_transaction(int transaction_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Inserting transaction" << endl;
-    string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + transaction_id + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
+    string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + to_string(transaction_id) + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
     work W(*C);
     W.exec(sql);
     W.commit();
@@ -148,9 +148,17 @@ void Database::update_buy_order(string stock_id, string account_id, double num, 
     W.commit();
 }
 
-void Database::update_transaction(string transaction_id, string account_id, string stock_id, double num, double price, string status){
+void Database::update_transaction(int transaction_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Updating transaction" << endl;
-    string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + transaction_id + "';";
+    string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + to_string(transaction_id) + "';";
+    work W(*C);
+    W.exec(sql);
+    W.commit();
+}
+
+void Database::update_transaction(int transaction_id, string status){
+    cout << "Updating transaction" << endl;
+    string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "' WHERE TRANSACTION_ID = '" + to_string(transaction_id) + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
@@ -180,7 +188,7 @@ void Database::delete_sell_order(string stock_id, string account_id){
     W.commit();
 }
 
-void Database::delete_buy_order( string stock_id, string account_id){
+void Database::delete_buy_order(string stock_id, string account_id){
     cout << "Deleting buy order" << endl;
     string sql = "DELETE FROM BUY_ORDER WHERE SHARE_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
@@ -188,9 +196,9 @@ void Database::delete_buy_order( string stock_id, string account_id){
     W.commit();
 }
 
-void Database::delete_transaction(string transaction_id){
+void Database::delete_transaction(int transaction_id){
     cout << "Deleting transaction" << endl;
-    string sql = "DELETE FROM TRANSACTION WHERE TRANSACTION_ID = '" + transaction_id + "';";
+    string sql = "DELETE FROM TRANSACTION WHERE TRANSACTION_ID = '" + to_string(transaction_id) + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
@@ -232,5 +240,13 @@ result Database::inquire_stock(string stock_id, string account_id){
     return R;
 }
 
+
+result Database::inquire_transaction(int transaction_id){
+    string sql = "SELECT * FROM TRANSACTION WHERE TRANSACTION_ID = '" + to_string(transaction_id) + "';";
+    work W(*C);
+    result R = W.exec(sql);
+    W.commit();
+    return R;
+}
 
 

@@ -34,7 +34,7 @@ struct ResultC {
 struct ResultT{
     string account_id;
     string transaction_type;
-    int transaction_id;
+    int trans_id;
     string sym;
     string status;
     string message;

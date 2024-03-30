@@ -70,29 +70,31 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
         }
     }
+
+    return res;
 }
 
 ResultT Transact::cancelOrder(int trans_id){
-    result R = db.inquire_transaction(transaction_id);
+    result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
     if (R.size() != 0){
-        db.update_transaction(transaction_id, "canceled");
-        R = db.inquire_transaction(transaction_id);
+        db.update_transaction(trans_id, "canceled");
+        R = db.inquire_transaction(trans_id);
         for (result::iterator i = R.begin(); i != R.end(); ++i){
             Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<int>(), i[3].as<double>(), i[4].as<string>(), "canceled"};
             trans_history.push_back(curr_trans);
         }
-        res = {"", "cancel", transaction_id, "", "success", "", trans_history};
+        res = {"", "cancel", trans_id, "", "success", "", trans_history};
     }
     else {
-        res = {"", "cancel", transaction_id, "", "error", "Transaction does not exist", trans_history};
+        res = {"", "cancel", trans_id, "", "error", "Transaction does not exist", trans_history};
     }
     return res;
 }
 
 ResultT Transact::queryOrder(int trans_id){
-    result R = db.inquire_transaction(transaction_id);
+    result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
     if (R.size() != 0){
@@ -100,10 +102,10 @@ ResultT Transact::queryOrder(int trans_id){
             Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<int>(), i[3].as<double>(), i[4].as<string>(), i[5].as<string>()};
             trans_history.push_back(curr_trans);
         }
-        res = {"", "query", transaction_id, "", "success", "", trans_history};
+        res = {"", "query", trans_id, "", "success", "", trans_history};
     }
     else {
-        res = {"", "query", transaction_id, "", "error", "Transaction does not exist", trans_history};
+        res = {"", "query", trans_id, "", "error", "Transaction does not exist", trans_history};
     }
     return res;
 }
