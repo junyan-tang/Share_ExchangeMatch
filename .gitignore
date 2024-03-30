@@ -10,7 +10,7 @@ CMakeLists.txt
 \#*
 
 # Ignore vscode setting
-.vscode/settings.json
+.vscode
 
 # Ignore intelliJ setting
 .idea/misc.xml
