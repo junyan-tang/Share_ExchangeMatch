@@ -9,14 +9,13 @@ using namespace std;
 class XMLParser {
 private:
     Creation creator;
-    Transaction transactor;
+    Transact transactor;
 public:
     string parseRequest(string xml);
     vector<ResultC> processCreate(const pugi::xml_node &node);
-    void processTransaction(const pugi::xml_node &node);
+    vector<ResultT> processTransaction(const pugi::xml_node &node);
     string responseForCreate(vector<ResultC> results);
-    string responseForOrder();
-    string responseForTransaction(result R);
+    string responseForTransaction(vector<ResultT> results);
     string generateResponse();
 };
 

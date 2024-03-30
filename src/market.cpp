@@ -1,5 +1,3 @@
-
-
 #include "market.hpp"
 #include <algorithm>
 
@@ -10,8 +8,6 @@ void market::add_sell_order(Order order){
 void market::add_buy_order(Order order){
     buy_orders[order.stock_id].push_back(order);
 }
-
-
 
 void market::update_sell_orders(Order new_order) {
     update_orders(sell_orders, new_order);
@@ -30,8 +26,6 @@ void market::update_orders(map<string, vector<Order>> & orders, const Order& new
         }
     }
 }
-
-
 
 Transaction market::match_sell() {
     Transaction transaction;

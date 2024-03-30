@@ -1,4 +1,6 @@
 #include "business.hpp"
+#include <chrono>
+#include <ctime>
 
 ResultC Creation::createAccount(string account_id, string balance){
     result R = db.inquire_account(account_id);
@@ -34,21 +36,32 @@ ResultC Creation::createStock(string sym, string account_id, double amount){
     return res;
 }
 
-void Transaction::openOrder(string account_id, string stock_id, string amount, string limit){
+void Transact::openOrder(string account_id, string stock_id, string amount, string limit){
     double shares = stod(amount);
     double price = stod(limit);
+    auto now = chrono::system_clock::now();
+    time_t now_c = chrono::system_clock::to_time_t(now);
+    string timestamp = ctime(&now_c);
     if (shares < 0){
-        db.insert_sell_order(stock_id, account_id, abs(shares), price);
+        db.insert_sell_order(stock_id, account_id, abs(shares), price, timestamp);
     }
     else if (shares > 0){
-        db.insert_buy_order(stock_id, account_id, shares, price);
+        db.insert_buy_order(stock_id, account_id, shares, price, timestamp);
     }
 }
 
-void Transaction::cancelOrder(string transaction_id){
+void Transact::cancelOrder(string transaction_id){
     db.delete_transaction(transaction_id);
 }
 
-void Transaction::queryOrder(string transaction_id){
+void Transact::queryOrder(string transaction_id){
     
+}
+
+bool Transact::checkAccount(string account_id){
+    result R = db.inquire_account(account_id);
+    if(R.size() == 0){
+        return false;
+    }
+    return true;
 }

@@ -13,7 +13,13 @@ struct ResultC {
 };
 
 struct ResultT{
-
+    string account_id;
+    string transaction_type;
+    string transaction_id;
+    string sym;
+    string status;
+    string message;
+    vector<Transaction> transaction;
 };
 
 struct Order {
