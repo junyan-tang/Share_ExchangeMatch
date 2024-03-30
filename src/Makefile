@@ -1,9 +1,10 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -g -Wall
-LDFLAGS = -lpthread -lpqxx -lpugixml # 根据需要添加其他库
+LDFLAGS = -lpthread -lpqxx -lpugixml
 
-MAIN_SRCS = main.cpp server.cpp database.cpp #helper.cpp
-CLIENT_SRCS = client.cpp  database.cpp #helper.cpp
+# Ensure that parser.cpp is included in the compilation for main
+MAIN_SRCS = main.cpp database.cpp server.cpp parser.cpp business.cpp
+CLIENT_SRCS = client.cpp database.cpp
 
 TARGETS = main client
 

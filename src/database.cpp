@@ -1,22 +1,21 @@
 
 
 
-#include <iostream>
+
 #include "database.hpp"
 
 void Database::drop_table(){
     cout << "Dropping table" << endl;
 
-
     work W(*C);
-    W.exec("DROP TABLE IF EXISTS \"User\";");
-    W.exec("DROP TABLE IF EXISTS SHARE;");
-    W.exec("DROP TABLE IF EXISTS \"Order\";");
+    W.exec("DROP TABLE IF EXISTS TRANSACTION CASCADE;");
+    W.exec("DROP TABLE IF EXISTS BUY_ORDER CASCADE;");
+    W.exec("DROP TABLE IF EXISTS SELL_ORDER CASCADE;");
+    W.exec("DROP TABLE IF EXISTS SHARE CASCADE;");
+    W.exec("DROP TABLE IF EXISTS ACCOUNT CASCADE;");
     W.commit();
-    
-
-
 }
+
 
 void Database::create_table(){
     cout << "Creating table" << endl;
@@ -197,6 +196,8 @@ void Database::delete_transaction(string transaction_id){
     W.commit();
 }
 
+
+
 void Database::show_table(string table){
 
     string sql = "SELECT * FROM " + table + ";";
@@ -212,6 +213,23 @@ void Database::show_table(string table){
         cout << endl;
     }
 
+
+}
+
+result Database::inquire_account(string account_id){
+    string sql = "SELECT * FROM ACCOUNT WHERE ACCOUNT_ID = '" + account_id + "';";
+    work W(*C);
+    pqxx::result R = W.exec(sql);
+    W.commit();
+    return R;
+}
+
+result Database::inquire_stock(string stock_id, string account_id){
+    string sql = "SELECT * FROM SHARE WHERE SHAREID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    work W(*C);
+    result R = W.exec(sql);
+    W.commit();
+    return R;
 }
 
 

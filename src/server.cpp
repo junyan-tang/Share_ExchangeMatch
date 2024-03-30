@@ -1,7 +1,5 @@
 #include "server.hpp"
-#include <cstring>
-#include <iostream>
-#include <vector>
+
 
 
 
@@ -12,6 +10,8 @@ Server::Server() {
   host.ai_socktype = SOCK_STREAM;
   host.ai_flags = AI_PASSIVE;
   status = getaddrinfo(NULL, PORT, &host, &host_list);
+
+
 
   if (status != 0) {
     cerr << "Error: address issue" << endl;
@@ -109,6 +109,12 @@ void Server::process() {
   string data = rece_request(new_fd);
 
   cout << "receive data in server: " << data << endl;
+
+  string re = parser.parseRequest(data);
+
+
+  cout << "here is response: " << re << endl;
+
 
   close(new_fd);
   

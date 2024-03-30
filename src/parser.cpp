@@ -5,18 +5,22 @@
 string XMLParser::parseRequest(string xml){
     pugi::xml_document doc;
     string response;
+    cout << "Parsing request" << endl;
     if(!doc.load_string(xml.c_str())){
         cout << "Invalid XML" << endl;
-        return;
+        return "invalid xml";
     }
     if (doc.child("create")){
         vector<ResultC> creation_result =  processCreate(doc.child("create"));
         response = responseForCreate(creation_result);
-    } else if (doc.child("transaction")){
-        processTransaction(doc.child("transaction"));
-    } else {
-        cout << "Invalid request" << endl;
-    }
+    } 
+    // else if (doc.child("transaction")){
+    //     vector<ResultT> transaction_result = processTransaction(doc.child("transaction"));
+    //     response = responseForTransaction(transaction_result);
+    // } else {
+    //     cout << "Invalid request" << endl;
+    //     return "invalid request";
+    // }
     return response;
 }
 
@@ -47,34 +51,39 @@ vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
     return results;
 }
 
-void XMLParser::processTransaction(const pugi::xml_node &node){
-    if(node.attribute("id")){
-        if (!node.first_child()) {
-            cout << "Invalid transaction" << endl;
-            return;
-        }
-        string transaction_id = node.attribute("id").value();
-        pugi::xml_node trans_type = node.first_child();
-        while (trans_type){
-            if (string(trans_type.name()) == "order"){
-                string sym = trans_type.attribute("sym").value();
-                string amount = trans_type.attribute("amount").value();
-                string limit = trans_type.attribute("limit").value();
-            }
-            else if (string(trans_type.name()) == "cancel") {
-                string transaction_id = trans_type.attribute("id").value();
-            }
-            else if (string(trans_type.name()) == "query") {
-                string transaction_id = trans_type.attribute("id").value();
-            }
-            trans_type = trans_type.next_sibling();
-        }
-    }
-    else{
-        cout << "Invalid transaction" << endl;
-        return;
-    }
-}
+// vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
+//     vector<ResultT> results;
+//     if(node.attribute("id")){
+//         string account_id = node.attribute("id").value();
+//         if(!transactor.checkAccount(account_id)){
+//             cout << "Invalid account" << endl;
+//             return results;
+//         }
+//         if (!node.first_child()) {
+//             cout << "Invalid transaction" << endl;
+//             return results;
+//         }
+//         pugi::xml_node trans_type = node.first_child();
+//         while (trans_type){
+//             if (string(trans_type.name()) == "order"){
+//                 string sym = trans_type.attribute("sym").value();
+//                 string amount = trans_type.attribute("amount").value();
+//                 string limit = trans_type.attribute("limit").value();
+//             }
+//             else if (string(trans_type.name()) == "cancel") {
+//                 string transaction_id = trans_type.attribute("id").value();
+//             }
+//             else if (string(trans_type.name()) == "query") {
+//                 string transaction_id = trans_type.attribute("id").value();
+//             }
+//             trans_type = trans_type.next_sibling();
+//         }
+//     }
+//     else{
+//         cout << "Invalid transaction" << endl;
+//         return results;
+//     }
+// }
 
 string XMLParser::responseForCreate(vector<ResultC> results){
     pugi::xml_document doc;
@@ -102,24 +111,62 @@ string XMLParser::responseForCreate(vector<ResultC> results){
     return ss.str();
 }
 
-string XMLParser::responseForTransaction(result R){
-    result results;
-    pugi::xml_document doc;
-    auto root = doc.append_child("results");
+// string XMLParser::responseForTransaction(vector<ResultT> results){
+//     pugi::xml_document doc;
+//     auto root = doc.append_child("results");
 
-    for(const auto& result : results) {
-        //if result is success
-        if (true) {
-            
-        }
-        else {
-            auto error = root.append_child("error");
-            error.append_attribute("sym") = "test";
-            error.append_attribute("amount") = "test";
-            error.append_attribute("limit") = "test";
-            error.text().set("test");
-        }
+//     for(const auto& result : results) {
+//         if (result.status == "success") {
+//             if (result.transaction_type == "order") {
+//                 auto opened = root.append_child("opened");
+//                 opened.append_attribute("sym") = result.transaction[0].stock_id.c_str();
+//                 opened.append_attribute("amount") = result.transaction[0].num;
+//                 opened.append_attribute("limit") = result.transaction[0].price;
+//                 opened.append_attribute("id") = result.transaction_id.c_str();
+//             }
+//             else{
+//                 pugi::xml_node operation;
+//                 if(result.transaction_type == "cancel"){
+//                     operation = root.append_child("canceled");
+//                 }
+//                 else if(result.transaction_type == "query"){
+//                     operation = root.append_child("status");
+//                 }
+//                 for (const auto& transaction : result.transaction) {
+//                     if (transaction.status == "open") {
+//                         operation.append_child("open")
+//                                 .append_attribute("shares") = transaction.num;
+//                     }
+//                     else if(transaction.status == "canceled"){
+//                         auto cancel = operation.append_child("canceled");
+//                         cancel.append_attribute("shares") = transaction.num;
+//                         cancel.append_attribute("time") = transaction.order_time.c_str();
+//                     }
+//                     else if(transaction.status == "executed") {
+//                         auto executed = operation.append_child("executed");
+//                         executed.append_attribute("shares") = transaction.num;     
+//                         executed.append_attribute("price") = transaction.price;
+//                         executed.append_attribute("time") = transaction.order_time.c_str();
+//                     }
+//                 }
+//             }
+//         }
 
-    }
-    
-}
+//         else {
+//             auto error = root.append_child("error");
+//             if (result.transaction_type == "order") {
+//                 error.append_attribute("sym") = result.transaction[0].stock_id.c_str();
+//                 error.append_attribute("amount") = result.transaction[0].num;
+//                 error.append_attribute("limit") = result.transaction[0].price;
+//                 error.text().set(result.message.c_str());
+//             }
+//             else{
+//                 error.append_attribute("id") = result.transaction_id.c_str();
+//                 error.text().set(result.message.c_str());
+//             }
+//         }
+//     }
+//     stringstream ss;
+//     doc.save(ss);
+//     return ss.str();
+// }

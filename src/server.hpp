@@ -6,14 +6,20 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <string>
+#include <cstring>
+#include <iostream>
+#include <vector>
+
+#include "parser.hpp"
 
 using namespace std;
 #define PORT "12345"
+
 class Server{
 private:
 
 
-
+    XMLParser parser;
 
     int server_sockfd;
     int status;

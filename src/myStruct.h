@@ -3,18 +3,10 @@
 
 
 #include <string>
+#include <vector>
 using namespace std;
 
-struct ResultC {
-    string account_id;
-    string sym;
-    string status;
-    string message;
-};
 
-struct ResultT{
-
-};
 
 struct Order {
     string stock_id;
@@ -33,6 +25,23 @@ struct Transaction {
     string status;
 };
 
+
+struct ResultC {
+    string account_id;
+    string sym;
+    string status;
+    string message;
+};
+
+struct ResultT{
+    string account_id;
+    string transaction_type;
+    string transaction_id;
+    string sym;
+    string status;
+    string message;
+    vector<Transaction> transaction;
+};
 
 // struct Transaction{
 //     string transaction_id

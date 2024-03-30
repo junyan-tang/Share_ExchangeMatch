@@ -1,17 +1,20 @@
+#ifndef DATABASE_HPP
+#define DATABASE_HPP
+
 #include <string>
-
-
 #include <iostream>
 #include <pqxx/pqxx>
 #include <fstream>
 
-using namespace std;
 
+using namespace std;
 using namespace pqxx;
+
 class Database{
-private:
-    connection *C;
+
+
 public:
+    connection *C;
     void drop_table();
     void create_table();
     void init_database();
@@ -46,3 +49,4 @@ public:
 
 };
 
+#endif // DATABASE_HPP

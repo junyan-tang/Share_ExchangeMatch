@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     }
 
     string data = "173\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<create>\n<account id=\"123456\" balance=\"1000\"/>\n<symbol sym=\"SPY\">\n<account id=\"123456\">100000</account>\n</symbol>\n</create>\n";
+    
     send_data(sockfd, data);
 
     close(sockfd);

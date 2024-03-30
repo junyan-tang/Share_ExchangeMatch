@@ -12,14 +12,16 @@ int main(){
 
 
     Database db;
+    db.C = C;
     cout << "init main database" << endl;
     db.init_database();
     cout << "finish init main database" << endl;
-    // cout << "create server" << endl;
-    // Server server;
 
-    // cout << "run server" << endl;
-    // server.run();
+    cout << "create server" << endl;
+    Server server;
+
+
+    server.run();
 
     
 }
