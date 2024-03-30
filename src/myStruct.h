@@ -34,4 +34,10 @@ struct Transaction {
 };
 
 
+// struct Transaction{
+//     string transaction_id
+//     vector<Order, status> orders;
+//     string status;
+// }
+
 #endif

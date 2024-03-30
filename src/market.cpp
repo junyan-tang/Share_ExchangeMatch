@@ -12,7 +12,6 @@ void market::add_buy_order(Order order){
 }
 
 
-
 void market::update_sell_orders(Order new_order) {
     update_orders(sell_orders, new_order);
 }
