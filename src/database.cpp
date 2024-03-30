@@ -35,6 +35,7 @@ void Database::create_table(connection *C){
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
+            "ORDER_TIME TIMESTAMP WITHOUT TIME ZONE,"
             "PRIMARY KEY (ACCOUNT_ID, SHARE_ID));";
 
     sql += "CREATE TABLE BUY_ORDER("
@@ -42,14 +43,17 @@ void Database::create_table(connection *C){
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
+            "ORDER_TIME TIMESTAMP WITHOUT TIME ZONE,"
             "PRIMARY KEY (ACCOUNT_ID, SHARE_ID));";
+
 
     sql += "CREATE TABLE TRANSACTION("
             "TRANSACTION_ID TEXT PRIMARY KEY NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "SHARE_ID TEXT REFERENCES SHARE(SHAREID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
-            "PRICE NUMERIC NOT NULL);";
+            "PRICE NUMERIC NOT NULL,"
+            "STATUS TEXT NOT NULL);";
 
             
     work W(*C);
@@ -82,23 +86,27 @@ void Database::insert_stock(connection *C, string stock_id, string account_id, d
     W.commit();
 }
 
-void Database::insert_sell_order(connection *C, string stock_id, string account_id, double num, double price){
+void Database::insert_sell_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp){
     cout << "Inserting sell order" << endl;
-    string sql = "INSERT INTO SELL_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE) VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", " + to_string(price) + ");";
+    string sql = "INSERT INTO SELL_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME) "
+                 "VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", "
+                 + to_string(price) + ", '" + timestamp + "');";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
-void Database::insert_buy_order(connection *C, string stock_id, string account_id, double num, double price){
+void Database::insert_buy_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp){
     cout << "Inserting buy order" << endl;
-    string sql = "INSERT INTO BUY_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE) VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", " + to_string(price) + ");";
+    string sql = "INSERT INTO BUY_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME) "
+                 "VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", "
+                 + to_string(price) + ", '" + timestamp + "');";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
-void Database::insert_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, bool isSell){
+void Database::insert_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Inserting transaction" << endl;
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + transaction_id + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
     work W(*C);
@@ -123,23 +131,25 @@ void Database::update_stock(connection *C, string stock_id, string account_id, d
     W.commit();
 }
 
-void Database::update_sell_order(connection *C, string stock_id, string account_id, double num, double price){
+void Database::update_sell_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp){
     cout << "Updating sell order" << endl;
-    string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE SHARE_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
+                 "WHERE SHARE_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
-void Database::update_buy_order(connection *C, string stock_id, string account_id, double num, double price){
+void Database::update_buy_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp){
     cout << "Updating buy order" << endl;
-    string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE SHARE_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
+                 "WHERE SHARE_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
-void Database::update_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, bool isSell){
+void Database::update_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Updating transaction" << endl;
     string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + transaction_id + "';";
     work W(*C);

@@ -5,6 +5,10 @@
 #ifndef SHARE_EXCHANGEMATCH_MYSTRUCT_H
 #define SHARE_EXCHANGEMATCH_MYSTRUCT_H
 
+
+#include <string>
+using namespace std;
+
 struct Account {
     string account_id;
     string balance;
@@ -21,7 +25,7 @@ struct Order {
     string account_id;
     int num;
     double price;
-    bool isSell;
+    string order_time; 
 };
 
 

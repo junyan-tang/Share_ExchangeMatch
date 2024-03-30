@@ -16,17 +16,17 @@ class Database{
 
     void insert_account(connection *C, string account_id, string balance);
     void insert_stock(connection *C, string stock_id, string account_id, double num);
-    void insert_sell_order(connection *C, string stock_id, string account_id, double num, double price);
-    void insert_buy_order(connection *C, string stock_id, string account_id, double num, double price);
-    void insert_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, bool isSell);
+    void insert_sell_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp);
+    void insert_buy_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp);
+    void insert_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, string status);
 
 
 
     void update_account(connection *C, string account_id, string balance);
     void update_stock(connection *C, string stock_id, string account_id, double num);
-    void update_sell_order(connection *C, string stock_id, string account_id, double num, double price);
-    void update_buy_order(connection *C, string stock_id, string account_id, double num, double price);
-    void update_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, bool isSell);
+    void update_sell_order(connection *C, string stock_id, string account_id, double num, double pric, string timestamp);
+    void update_buy_order(connection *C, string stock_id, string account_id, double num, double price, string timestamp);
+    void update_transaction(connection *C, string transaction_id, string account_id, string stock_id, double num, double price, string status);
 
 
     void delete_account(connection *C, string account_id);
