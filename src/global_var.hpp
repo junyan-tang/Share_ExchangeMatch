@@ -3,5 +3,5 @@
 
 #include <pqxx/pqxx>
 extern pqxx::connection * root_connection;
-
+extern int transaction_id;
 #endif

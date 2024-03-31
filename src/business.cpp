@@ -1,7 +1,7 @@
 #include "business.hpp"
 #include <chrono>
 #include <ctime>
-int transaction_id = 0;
+// int transaction_id = 0;
 ResultC Creation::createAccount(string account_id, string balance){
     result R = db.inquire_account(account_id);
     ResultC res;
@@ -17,20 +17,28 @@ ResultC Creation::createAccount(string account_id, string balance){
 }
 
 ResultC Creation::createStock(string sym, string account_id, double amount){
+
     result account = db.inquire_account(account_id);
     ResultC res;
     if(account.size() == 0){
         res = {account_id, sym, "error", "Account does not exist"};
     }
     else{
+
         result R = db.inquire_stock(sym, account_id);
         if(R.size() == 0){
+
             db.insert_stock(sym, account_id, amount);
+
             res = {account_id, sym, "success", ""};
+
         }
         else{
-            double total = amount + R.begin()[0].as<double>();
+
+            double total = amount + R.begin()[2].as<double>();
+
             db.update_stock(sym, account_id, total);
+
             res = {account_id, sym, "success", ""};
         }
     }

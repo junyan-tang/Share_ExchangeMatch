@@ -2,7 +2,7 @@
 #include "myStruct.h"
 #include <vector>
 
-int transaction_id = 0;
+// int transaction_id = 0;
 string XMLParser::parseRequest(string xml){
     pugi::xml_document doc;
     string response;
@@ -25,7 +25,38 @@ string XMLParser::parseRequest(string xml){
     return response;
 }
 
+vector<ResultC> XMLParser::generateCreate(string xml){
+    pugi::xml_document doc;
+    vector<ResultC> results;
+    if(!doc.load_string(xml.c_str())){
+        cout << "Invalid XML" << endl;
+        return results;
+    }
+    if (doc.child("create")){
+        results = processCreate(doc.child("create"));
+    } else {
+        cout << "Invalid request" << endl;
+    }
+    return results;
+}
+
+vector<ResultT> XMLParser::generateTransaction(string xml){
+    pugi::xml_document doc;
+    vector<ResultT> results;
+    if(!doc.load_string(xml.c_str())){
+        cout << "Invalid XML" << endl;
+        return results;
+    }
+    if (doc.child("transaction")){
+        results = processTransaction(doc.child("transaction"));
+    } else {
+        cout << "Invalid request" << endl;
+    }
+    return results;
+}
+
 vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
+    
     vector<ResultC> results;
     if(!node.first_child()){
         return results;
@@ -40,6 +71,7 @@ vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
         }
         else if (string(create_type.name()) == "symbol") {
             string sym = create_type.attribute("sym").value();
+    
             for (pugi::xml_node acc : create_type.children("account")) {
                 string account_id = acc.attribute("id").value();
                 double amount = stod(acc.child_value());
@@ -130,7 +162,8 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
                 opened.append_attribute("sym") = result.transaction[0].stock_id.c_str();
                 opened.append_attribute("amount") = result.transaction[0].num;
                 opened.append_attribute("limit") = result.transaction[0].price;
-                opened.append_attribute("id") = result.trans_id.c_str();
+                opened.append_attribute("id") = to_string(result.trans_id).c_str();
+
             }
             else{
                 pugi::xml_node operation;
@@ -169,7 +202,7 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
                 error.text().set(result.message.c_str());
             }
             else{
-                error.append_attribute("id") = result.transaction_id.c_str();
+                error.append_attribute("id") =  to_string(result.trans_id).c_str();
                 error.text().set(result.message.c_str());
             }
         }
@@ -177,4 +210,28 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
     stringstream ss;
     doc.save(ss);
     return ss.str();
+}
+
+bool XMLParser::isCreate(string xml){
+    pugi::xml_document doc;
+    if(!doc.load_string(xml.c_str())){
+        cout << "Invalid XML" << endl;
+        return false;
+    }
+    if (doc.child("create")){
+        return true;
+    }
+    return false;
+}
+
+bool XMLParser::isTransaction(string xml){
+    pugi::xml_document doc;
+    if(!doc.load_string(xml.c_str())){
+        cout << "Invalid XML" << endl;
+        return false;
+    }
+    if (doc.child("transaction")){
+        return true;
+    }
+    return false;
 }

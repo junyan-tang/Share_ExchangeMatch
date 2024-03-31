@@ -49,6 +49,8 @@ Server::Server() {
 };
 
 void Server::run() {
+  db.show_table("ACCOUNT");
+  db.show_table("SHARE");
   while (true) {
     cout << "watting for connection" << endl;
     process();
@@ -56,7 +58,7 @@ void Server::run() {
 }
 
 
-string rece_request(int new_fd) {
+string Server::recv_request(int new_fd) {
 
     char buf[1024];
     memset(buf, 0, 1024); 
@@ -108,21 +110,38 @@ void Server::process() {
     exit(EXIT_FAILURE);
   }
 
-  string data = rece_request(new_fd);
+  while(true){
+    string data = recv_request(new_fd);
 
-  cout << "receive data in server: " << data << endl;
-  XMLParser parser;
+    cout << "receive data in server: " << data << endl;
+    XMLParser parser;
 
-  string re = parser.parseRequest(data);
+    string re = parser.parseRequest(data);
 
-  cout << "here is response: " << re << endl;
+    cout << "here is response: " << re << endl;
+  }
 
-
-  db.show_table("account");
-  db.show_table("share");
 
   close(new_fd);
   
+}
+
+void Server::handle_create(ResultC res) {
+  cout << "Handling create" << endl;
+  cout << "Account ID: " << res.account_id << endl;
+  cout << "Symbol: " << res.sym << endl;
+  cout << "Ammount: " << res.status << endl;
+  cout << "Message: " << res.message << endl;
+}
+
+void Server::handle_transaction(ResultT res) {
+  cout << "Handling transaction" << endl;
+  cout << "Account ID: " << res.account_id << endl;
+  cout << "Transaction Type: " << res.transaction_type << endl;
+  cout << "Transaction id: " << res.trans_id << endl;
+  cout << "Symbol: " << res.sym << endl;
+  cout << "Status: " << res.status << endl;
+  cout << "Message: " << res.message << endl;
 }
 
 Server::~Server() {

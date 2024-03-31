@@ -33,7 +33,9 @@ public:
     void run();
     void process();
     string recv_request(int new_fd);
-
+    void handle_create(ResultC res);
+    void handle_transaction(ResultT res);
+    
 
     ~Server();
 

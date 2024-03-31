@@ -13,11 +13,11 @@ int main(){
 
     Database db;
 
-    cout << "init main database" << endl;
-    db.init_database();
-    cout << "finish init main database" << endl;
 
-    cout << "create server" << endl;
+    db.init_database();
+
+
+
     Server server;
 
 

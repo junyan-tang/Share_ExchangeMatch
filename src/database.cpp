@@ -61,12 +61,11 @@ void Database::create_table(){
 }
 
 void Database::init_database(){
-    cout << "Initializing database" << endl;
-    cout << "drop first exist" << endl;
+
     drop_table();
-    cout << "create new table" << endl;
+
     create_table();
-    cout << "finish init database" << endl;
+
 }
 
 void Database::insert_account(string account_id, double balance){
