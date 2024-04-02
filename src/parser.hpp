@@ -24,7 +24,6 @@ public:
 
     bool isCreate(string xml);
     bool isTransaction(string xml);
-    //string generateResponse();
 };
 
 #endif

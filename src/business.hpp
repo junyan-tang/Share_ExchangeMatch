@@ -15,7 +15,7 @@ public:
     ResultT openOrder(string account_id, string stock_id, string amount, string limit, int trans_id);
     ResultT cancelOrder(int trans_id);
     ResultT queryOrder(int trans_id);
-    //bool checkAccount(string account_id);
+    bool checkAccount(string account_id);
 };
 
 class Creation {

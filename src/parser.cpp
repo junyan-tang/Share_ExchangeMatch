@@ -71,12 +71,21 @@ vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
         }
         else if (string(create_type.name()) == "symbol") {
             string sym = create_type.attribute("sym").value();
-    
+            if (!create_type.first_child()) {
+                ResultC current_result = {"", sym, "error", "No account included"};
+                results.push_back(current_result);
+            }
             for (pugi::xml_node acc : create_type.children("account")) {
                 string account_id = acc.attribute("id").value();
                 double amount = stod(acc.child_value());
-                ResultC current_result = creator.createStock(sym, account_id, amount);
-                results.push_back(current_result);
+                if(amount < 0){
+                    ResultC current_result = {"", sym, "error", "Shares cannot be negative"};
+                    results.push_back(current_result);
+                }
+                else{
+                    ResultC current_result = creator.createStock(sym, account_id, amount);
+                    results.push_back(current_result);
+                }   
             }
         }
         create_type = create_type.next_sibling();
@@ -89,12 +98,16 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
     transaction_id++;
     if(node.attribute("id")){
         string account_id = node.attribute("id").value();
-        if(false){
-            cout << "Invalid account" << endl;
+        if(!transactor.checkAccount(account_id)){
+            for(pugi::xml_node node:node.children()){
+                ResultT current_result = {"", "", transaction_id, "", "error", "This account is invalid", {}};
+                results.push_back(current_result);
+            }
             return results;
         }
         if (!node.first_child()) {
-            cout << "Invalid transaction" << endl;
+            ResultT current_result = {"", "", transaction_id, "", "error", "No transaction included", {}};
+            results.push_back(current_result);
             return results;
         }
         pugi::xml_node trans_type = node.first_child();
@@ -120,7 +133,8 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
         }
     }
     else{
-        cout << "Invalid transaction" << endl;
+        ResultT current_result = {"", "", transaction_id, "", "error", "No account id included", {}};
+        results.push_back(current_result);
     }
     return results;
 }

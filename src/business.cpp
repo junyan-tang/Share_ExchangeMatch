@@ -6,9 +6,12 @@ ResultC Creation::createAccount(string account_id, string balance){
     result R = db.inquire_account(account_id);
     ResultC res;
     double curr_balance = stod(balance);
-    if(R.size() == 0){
+    if(R.size() == 0 and curr_balance >= 0){
         db.insert_account(account_id, curr_balance);
         res = {account_id, "", "success", ""};
+    }
+    else if(curr_balance < 0){
+        res = {account_id, "", "error", "Balance cannot be negative"};
     }
     else{
         res = {account_id, "", "error", "Account already exists"};
@@ -17,28 +20,20 @@ ResultC Creation::createAccount(string account_id, string balance){
 }
 
 ResultC Creation::createStock(string sym, string account_id, double amount){
-
     result account = db.inquire_account(account_id);
     ResultC res;
     if(account.size() == 0){
         res = {account_id, sym, "error", "Account does not exist"};
     }
     else{
-
         result R = db.inquire_stock(sym, account_id);
         if(R.size() == 0){
-
             db.insert_stock(sym, account_id, amount);
-
             res = {account_id, sym, "success", ""};
-
         }
         else{
-
             double total = amount + R.begin()[2].as<double>();
-
             db.update_stock(sym, account_id, total);
-
             res = {account_id, sym, "success", ""};
         }
     }
@@ -116,4 +111,12 @@ ResultT Transact::queryOrder(int trans_id){
         res = {"", "query", trans_id, "", "error", "Transaction does not exist", trans_history};
     }
     return res;
+}
+
+bool Transact::checkAccount(string account_id){
+    result R = db.inquire_account(account_id);
+    if (R.size() == 0){
+        return false;
+    }
+    return true;
 }
