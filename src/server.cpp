@@ -90,7 +90,7 @@ string Server::recv_request(int new_fd) {
             break; 
         }
 
-        memset(buf, 0, bytesReceived);
+        memset(buf, 0, 1024);
     }
 
     return data;

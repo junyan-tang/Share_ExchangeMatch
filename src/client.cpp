@@ -56,7 +56,9 @@ int main(int argc, char *argv[]) {
             "<account id=\"223456\">10000</account>\n"
             "</symbol>\n"
             "</create>\n";
-    send_data(sockfd, resize_data(data));
+    data = resize_data(data);
+    send_data(sockfd, data);
+    cout << data << "\n======" << endl;
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<transactions id=\"123456\">\n"
@@ -64,9 +66,9 @@ int main(int argc, char *argv[]) {
             "<query id=\"78910\"/>\n"
             "<cancel id=\"78910\"/>\n"
             "</transactions>\n";
-
-
-    send_data(sockfd, resize_data(data1));
+    data1 = resize_data(data1);
+    send_data(sockfd, data1);
+    cout << data1 << "\n======" << endl;
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"123456\">\n"
@@ -74,8 +76,10 @@ int main(int argc, char *argv[]) {
         "<query id=\"1\"/>\n"
         "</transactions>\n";
 
+    data2 = resize_data(data2);
 
-    send_data(sockfd, resize_data(data2));
+    send_data(sockfd, data2);
+    cout << data2 << "\n======" << endl;
 
     close(sockfd);
     freeaddrinfo(res);
