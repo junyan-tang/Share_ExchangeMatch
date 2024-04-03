@@ -11,14 +11,14 @@
 #include <vector>
 
 #include "parser.hpp"
+    #include "threadpool.hpp"
 
 using namespace std;
 #define PORT "12345"
 
 class Server{
 private:
-
-
+    Threadpool pool;
     XMLParser parser;
     Database db;
     int server_sockfd;
@@ -27,6 +27,8 @@ private:
     struct addrinfo *host_list;
     struct sockaddr_storage their_addr;
     socklen_t sin_size;
+
+
 
 public:
     Server();
