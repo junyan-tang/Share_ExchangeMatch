@@ -1,16 +1,12 @@
 #include "server.hpp"
 #include "parser.hpp"
 
-
-
-
 Server::Server() {
   memset(&host, 0, sizeof(host));
   host.ai_family = AF_UNSPEC;
   host.ai_socktype = SOCK_STREAM;
   host.ai_flags = AI_PASSIVE;
   status = getaddrinfo(NULL, PORT, &host, &host_list);
-
 
 
   if (status != 0) {
@@ -113,7 +109,7 @@ void Server::process() {
   while(true){
     string data = recv_request(new_fd);
 
-    cout << "receive data in server: " << data << endl;
+    cout << "receive data in server: " << data << endl; 
     XMLParser parser;
 
     string re = parser.parseRequest(data);

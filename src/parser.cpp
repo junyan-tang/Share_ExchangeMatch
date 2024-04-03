@@ -6,57 +6,57 @@
 string XMLParser::parseRequest(string xml){
     pugi::xml_document doc;
     string response;
-    cout << "Parsing request" << endl;
+    //cout << "Parsing request" << endl;
     if(!doc.load_string(xml.c_str())){
-        cout << "Invalid XML" << endl;
         return "invalid xml";
     }
     if (doc.child("create")){
         vector<ResultC> creation_result =  processCreate(doc.child("create"));
         response = responseForCreate(creation_result);
     } 
-    else if (doc.child("transaction")){
-        vector<ResultT> transaction_result = processTransaction(doc.child("transaction"));
+    else if (doc.child("transactions")){
+        //cout << "Processing transaction" << endl;
+        vector<ResultT> transaction_result = processTransaction(doc.child("transactions"));
+        //cout << "Generating response" << endl;
         response = responseForTransaction(transaction_result);
+        //cout<< "Response generated" << endl;
     } else {
-        cout << "Invalid request" << endl;
         return "invalid request";
     }
     return response;
 }
 
-vector<ResultC> XMLParser::generateCreate(string xml){
-    pugi::xml_document doc;
-    vector<ResultC> results;
-    if(!doc.load_string(xml.c_str())){
-        cout << "Invalid XML" << endl;
-        return results;
-    }
-    if (doc.child("create")){
-        results = processCreate(doc.child("create"));
-    } else {
-        cout << "Invalid request" << endl;
-    }
-    return results;
-}
+// vector<ResultC> XMLParser::generateCreate(string xml){
+//     pugi::xml_document doc;
+//     vector<ResultC> results;
+//     if(!doc.load_string(xml.c_str())){
+//         cout << "Invalid XML" << endl;
+//         return results;
+//     }
+//     if (doc.child("create")){
+//         results = processCreate(doc.child("create"));
+//     } else {
+//         cout << "Invalid request" << endl;
+//     }
+//     return results;
+// }
 
-vector<ResultT> XMLParser::generateTransaction(string xml){
-    pugi::xml_document doc;
-    vector<ResultT> results;
-    if(!doc.load_string(xml.c_str())){
-        cout << "Invalid XML" << endl;
-        return results;
-    }
-    if (doc.child("transaction")){
-        results = processTransaction(doc.child("transaction"));
-    } else {
-        cout << "Invalid request" << endl;
-    }
-    return results;
-}
+// vector<ResultT> XMLParser::generateTransaction(string xml){
+//     pugi::xml_document doc;
+//     vector<ResultT> results;
+//     if(!doc.load_string(xml.c_str())){
+//         cout << "Invalid XML" << endl;
+//         return results;
+//     }
+//     if (doc.child("transaction")){
+//         results = processTransaction(doc.child("transaction"));
+//     } else {
+//         cout << "Invalid request" << endl;
+//     }
+//     return results;
+// }
 
 vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
-    
     vector<ResultC> results;
     if(!node.first_child()){
         return results;
@@ -99,9 +99,11 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
     if(node.attribute("id")){
         string account_id = node.attribute("id").value();
         if(!transactor.checkAccount(account_id)){
-            for(pugi::xml_node node:node.children()){
-                ResultT current_result = {"", "", transaction_id, "", "error", "This account is invalid", {}};
+            pugi::xml_node curr_node = node.first_child();
+            while(curr_node){
+                ResultT current_result = {"", "", stoi(account_id), "", "error", "This account is invalid", {}};
                 results.push_back(current_result);
+                curr_node = curr_node.next_sibling();
             }
             return results;
         }
@@ -112,7 +114,9 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
         }
         pugi::xml_node trans_type = node.first_child();
         while (trans_type){
+            //cout << "Processing transaction test test" << endl;
             if (string(trans_type.name()) == "order"){
+                //cout << "Processing order" << endl;
                 string sym = trans_type.attribute("sym").value();
                 string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
@@ -120,11 +124,13 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "cancel") {
+                //cout << "Processing cancel" << endl;
                 string transaction_id = trans_type.attribute("id").value();
                 ResultT current_result = transactor.cancelOrder(stoi(transaction_id));
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "query") {
+                //cout << "Processing query" << endl;
                 string transaction_id = trans_type.attribute("id").value();
                 ResultT current_result = transactor.queryOrder(stoi(transaction_id));
                 results.push_back(current_result);
@@ -141,6 +147,11 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
 
 string XMLParser::responseForCreate(vector<ResultC> results){
     pugi::xml_document doc;
+
+    auto declaration = doc.prepend_child(pugi::node_declaration);
+    declaration.append_attribute("version") = "1.0";
+    declaration.append_attribute("encoding") = "UTF-8";
+
     auto root = doc.append_child("results");
 
     for(const auto& result : results) {
@@ -167,11 +178,20 @@ string XMLParser::responseForCreate(vector<ResultC> results){
 
 string XMLParser::responseForTransaction(vector<ResultT> results){
     pugi::xml_document doc;
+
+    auto declaration = doc.prepend_child(pugi::node_declaration);
+    declaration.append_attribute("version") = "1.0";
+    declaration.append_attribute("encoding") = "UTF-8";
+
     auto root = doc.append_child("results");
+    cout << results.size() << endl;
 
     for(const ResultT& result : results) {
+        cout << result.status << endl;
+        cout << result.message << endl;
         if (result.status == "success") {
             if (result.transaction_type == "order") {
+                cout << "Order success" << endl;
                 auto opened = root.append_child("opened");
                 opened.append_attribute("sym") = result.transaction[0].stock_id.c_str();
                 opened.append_attribute("amount") = result.transaction[0].num;
@@ -182,9 +202,11 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
             else{
                 pugi::xml_node operation;
                 if(result.transaction_type == "cancel"){
+                    cout << "Cancel success" << endl;
                     operation = root.append_child("canceled");
                 }
                 else if(result.transaction_type == "query"){
+                    cout << "Query success" << endl;
                     operation = root.append_child("status");
                 }
                 for (const auto& transaction : result.transaction) {

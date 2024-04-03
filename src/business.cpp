@@ -57,6 +57,8 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
+            Transaction curr = {sym, account_id, shares, price, timestamp, "error"};
+            trans_history.push_back(curr);
             res = {account_id, "order", trans_id, sym, "error", "Not enough shares", trans_history};
         }
     }
@@ -70,6 +72,8 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
+            Transaction curr = {sym, account_id, shares, price, timestamp, "error"};
+            trans_history.push_back(curr);
             res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
         }
     }

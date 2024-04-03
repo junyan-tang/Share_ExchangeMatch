@@ -17,7 +17,7 @@ struct Order {
 struct Transaction {
     string stock_id;
     string account_id;
-    int num;
+    double num;
     double price;
     string order_time; 
     string status;

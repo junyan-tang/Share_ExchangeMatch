@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <vector>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -9,7 +10,8 @@ using namespace std;
 
 
 string resize_data(string data){
-    size_t dataLength = data.size();
+    // size_t dataLength = data.size();
+    size_t dataLength = sizeof(data);
     data = to_string(dataLength) + "\n" + data;
     return data;
 }
@@ -44,17 +46,36 @@ int main(int argc, char *argv[]) {
     }
 
     string data;
-    data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<create>\n<account id=\"123456\" balance=\"1000\"/>\n<symbol sym=\"SPY\">\n<account id=\"123456\">100000</account>\n</symbol>\n</create>\n";
+    //data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<create>\n<account id=\"123456\" balance=\"1000\"/>\n<symbol sym=\"SPY\">\n<account id=\"123456\">100000</account>\n</symbol>\n</create>\n";
     
+    data =   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<create>\n"
+            "<account id=\"123456\" balance=\"1000\"/>\n"
+            "<symbol sym=\"SPY\">\n"
+            "<account id=\"123456\">-10000</account>\n"
+            "<account id=\"223456\">10000</account>\n"
+            "</symbol>\n"
+            "</create>\n";
     send_data(sockfd, resize_data(data));
+    
+    string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<transactions id=\"123456\">\n"
+            "<order sym=\"SPY\" amount=\"100\" limit=\"300\"/>\n"
+            "<query id=\"78910\"/>\n"
+            "<cancel id=\"78910\"/>\n"
+            "</transactions>\n";
 
-    data =       "<transactions id=\"123456\">\n"
-                  "<order sym=\"SPY\" amount=\"100\" limit=\"300\"/>\n"
-                  "<query id=\"78910\"/>\n"
-                  "<cancel id=\"78910\"/>\n"
-                  "</transactions>\n";
 
-    send_data(sockfd, resize_data(data));
+    send_data(sockfd, resize_data(data1));
+
+    string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<transactions id=\"123456\">\n"
+        "<order sym=\"SPY\" amount=\"100\" limit=\"300\"/>\n"
+        "<query id=\"1\"/>\n"
+        "</transactions>\n";
+
+
+    send_data(sockfd, resize_data(data2));
 
     close(sockfd);
     freeaddrinfo(res);
