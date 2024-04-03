@@ -114,9 +114,9 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
         }
         pugi::xml_node trans_type = node.first_child();
         while (trans_type){
-            //cout << "Processing transaction test test" << endl;
+            cout << "Processing transaction test test" << endl;
             if (string(trans_type.name()) == "order"){
-                //cout << "Processing order" << endl;
+                cout << "Processing order" << endl;
                 string sym = trans_type.attribute("sym").value();
                 string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
@@ -124,13 +124,13 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "cancel") {
-                //cout << "Processing cancel" << endl;
+                cout << "Processing cancel" << endl;
                 string transaction_id = trans_type.attribute("id").value();
                 ResultT current_result = transactor.cancelOrder(stoi(transaction_id));
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "query") {
-                //cout << "Processing query" << endl;
+                cout << "Processing query" << endl;
                 string transaction_id = trans_type.attribute("id").value();
                 ResultT current_result = transactor.queryOrder(stoi(transaction_id));
                 results.push_back(current_result);

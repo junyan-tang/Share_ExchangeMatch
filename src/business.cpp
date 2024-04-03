@@ -1,7 +1,7 @@
 #include "business.hpp"
 #include <chrono>
 #include <ctime>
-// int transaction_id = 0;
+
 ResultC Creation::createAccount(string account_id, string balance){
     result R = db.inquire_account(account_id);
     ResultC res;
@@ -48,17 +48,26 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     auto now = chrono::system_clock::now();
     time_t now_c = chrono::system_clock::to_time_t(now);
     string timestamp = ctime(&now_c);
+    Transaction curr = {sym, account_id, shares, price, timestamp, ""};
+    trans_history.push_back(curr);
     if (shares < 0){
+        cout << "test1" << endl;
         result R = db.inquire_stock(sym, account_id);
-        double curr_shares = R.begin()[2].as<double>();
+        double curr_shares;
+        if(R.size() == 0) {
+            curr_shares = 0;
+        }
+        else{
+            curr_shares = R.begin()[2].as<double>();
+        }
         if(curr_shares >= abs(shares)){
+            cout << "test3" << endl;
             db.insert_sell_order(sym, account_id, abs(shares), price, timestamp);
             db.update_stock(sym, account_id, curr_shares + shares);
+            cout << "test4" << endl;
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
-            Transaction curr = {sym, account_id, shares, price, timestamp, "error"};
-            trans_history.push_back(curr);
             res = {account_id, "order", trans_id, sym, "error", "Not enough shares", trans_history};
         }
     }
@@ -72,12 +81,9 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
-            Transaction curr = {sym, account_id, shares, price, timestamp, "error"};
-            trans_history.push_back(curr);
             res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
         }
     }
-
     return res;
 }
 
@@ -89,7 +95,7 @@ ResultT Transact::cancelOrder(int trans_id){
         db.update_transaction(trans_id, "canceled");
         R = db.inquire_transaction(trans_id);
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<int>(), i[3].as<double>(), i[4].as<string>(), "canceled"};
+            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<double>(), i[3].as<double>(), i[4].as<string>(), "canceled"};
             trans_history.push_back(curr_trans);
         }
         res = {"", "cancel", trans_id, "", "success", "", trans_history};
@@ -106,7 +112,7 @@ ResultT Transact::queryOrder(int trans_id){
     vector<Transaction> trans_history;
     if (R.size() != 0){
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<int>(), i[3].as<double>(), i[4].as<string>(), i[5].as<string>()};
+            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<double>(), i[3].as<double>(), i[4].as<string>(), i[5].as<string>()};
             trans_history.push_back(curr_trans);
         }
         res = {"", "query", trans_id, "", "success", "", trans_history};

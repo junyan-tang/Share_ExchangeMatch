@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
             "<create>\n"
             "<account id=\"123456\" balance=\"1000\"/>\n"
             "<symbol sym=\"SPY\">\n"
-            "<account id=\"123456\">-10000</account>\n"
-            "<account id=\"223456\">10000</account>\n"
+            "<account id=\"123456\">10000</account>\n"
+            "<account id=\"123456\">100</account>\n"
             "</symbol>\n"
             "</create>\n";
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<transactions id=\"123456\">\n"
-            "<order sym=\"SPY\" amount=\"100\" limit=\"300\"/>\n"
+            "<order sym=\"SPY\" amount=\"-100\" limit=\"300\"/>\n"
             "<query id=\"78910\"/>\n"
             "<cancel id=\"78910\"/>\n"
             "</transactions>\n";
