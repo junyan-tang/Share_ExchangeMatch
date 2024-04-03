@@ -54,46 +54,47 @@ void Server::run() {
   }
 }
 
+string Server::recv_request(int socket_fd) {
+ 
+    cout << "begin receve request" << endl;
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+    memset(buffer, 0, bufferSize);
 
-string Server::recv_request(int new_fd) {
+    string lengthStr;
+    while (true) {
+        ssize_t bytesReceived = recv(socket_fd, buffer, 1, 0); 
+        if (bytesReceived <= 0) { 
+            cout << "receive length failed" << endl;
+            break;
 
-    char buf[1024];
-    memset(buf, 0, 1024); 
+        }
+        if (buffer[0] == '\n') break; 
+        lengthStr += buffer[0];
+    }
+
+    size_t expectedLength = stoull(lengthStr); 
+    cout << "Expected length: " << expectedLength << endl;
 
     string data;
     size_t totalBytesReceived = 0;
-    bool headerParsed = false;
-    size_t expectedLength = 0; 
+    while (totalBytesReceived < expectedLength) {
+        size_t bytesToRead = std::min(static_cast<size_t>(bufferSize), expectedLength - totalBytesReceived);
+        ssize_t bytesReceived = recv(socket_fd, buffer, bytesToRead, 0);
 
-    while (true) {
-        int bytesReceived = recv(new_fd, buf, 1024, 0);
+        if (bytesReceived <= 0) { 
+            cout << "Error: recv failed in loop" << endl;
+            break;
 
-        if (bytesReceived == -1) {
-            cerr << "Error: recv failed" << endl;
-            exit(EXIT_FAILURE);
         }
-
-        data.append(buf, bytesReceived);
+        data.append(buffer, bytesReceived);
         totalBytesReceived += bytesReceived;
-
-        if (!headerParsed) {
-            size_t endOfLength = data.find("\n");
-            if (endOfLength != string::npos) {
-                expectedLength = stoull(data.substr(0, endOfLength));
-                headerParsed = true;
-                data.erase(0, endOfLength + 1); 
-                totalBytesReceived -= (endOfLength + 1); 
-            }
-        }
-
-        if (headerParsed && (totalBytesReceived >= expectedLength || data.find("</create>") != string::npos)) {
-            break; 
-        }
-
-        memset(buf, 0, 1024);
     }
 
+    cout << "receive end" << endl;
+
     return data;
+
 }
 
 
@@ -112,12 +113,14 @@ void Server::process() {
 
 
   pool.enqueue([this, new_fd] {
-    while(true){
+    int a = 0;
+    while(a<5){
       string data = recv_request(new_fd);
       cout << "receive data in server: " << data << endl; 
-      XMLParser parser;
-      string re = parser.parseRequest(data);
-      cout << "here is response: " << re << endl;
+      // XMLParser parser;
+      // string re = parser.parseRequest(data);
+      // cout << "here is response: " << re << endl;
+      a+= 1;
     }
     close(new_fd);
   });
