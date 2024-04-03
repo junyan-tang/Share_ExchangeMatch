@@ -51,7 +51,6 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     Transaction curr = {sym, account_id, shares, price, timestamp, ""};
     trans_history.push_back(curr);
     if (shares < 0){
-        cout << "test1" << endl;
         result R = db.inquire_stock(sym, account_id);
         double curr_shares;
         if(R.size() == 0) {
@@ -61,9 +60,9 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             curr_shares = R.begin()[2].as<double>();
         }
         if(curr_shares >= abs(shares)){
-            cout << "test3" << endl;
             db.insert_sell_order(sym, account_id, abs(shares), price, timestamp);
             db.update_stock(sym, account_id, curr_shares + shares);
+            db.insert_transaction(trans_id, account_id, sym, shares, price, "open");
             cout << "test4" << endl;
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
@@ -78,6 +77,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
         if (balance > money) {
             db.insert_buy_order(sym, account_id, shares, price, timestamp);
             db.update_account(account_id, balance - money);
+            db.insert_transaction(trans_id, account_id, sym, shares, price, "open");
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
