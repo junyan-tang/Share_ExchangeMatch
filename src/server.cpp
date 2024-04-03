@@ -65,8 +65,8 @@ string Server::recv_request(int socket_fd) {
     while (true) {
         ssize_t bytesReceived = recv(socket_fd, buffer, 1, 0); 
         if (bytesReceived <= 0) { 
-            cout << "receive length failed" << endl;
-            break;
+            cout << "receive length failed with value: " << bytesReceived << endl;
+            return "receive length failed";
 
         }
         if (buffer[0] == '\n') break; 
@@ -84,7 +84,7 @@ string Server::recv_request(int socket_fd) {
 
         if (bytesReceived <= 0) { 
             cout << "Error: recv failed in loop" << endl;
-            break;
+            return "Error: recv failed in loop";
 
         }
         data.append(buffer, bytesReceived);
@@ -110,16 +110,14 @@ void Server::process() {
 
 
 
-
-
   pool.enqueue([this, new_fd] {
     int a = 0;
     while(a<5){
       string data = recv_request(new_fd);
       cout << "receive data in server: " << data << endl; 
-      // XMLParser parser;
-      // string re = parser.parseRequest(data);
-      // cout << "here is response: " << re << endl;
+      XMLParser parser;
+      string re = parser.parseRequest(data);
+      cout << "here is response: " << re << endl;
       a+= 1;
     }
     close(new_fd);
