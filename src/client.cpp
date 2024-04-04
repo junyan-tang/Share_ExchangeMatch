@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     string data;
 
-    data =   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<create>\n"
             "<account id=\"123456\" balance=\"1000\"/>\n"
             "<symbol sym=\"SPY\">\n"
@@ -79,6 +79,8 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data2);
     cout << data2 << "\n======" << endl;
+
+
 
     close(sockfd);
     freeaddrinfo(res);
