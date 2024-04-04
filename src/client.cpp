@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     string data;
 
-    data =   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<create>\n"
             "   <account id=\"123456\" balance=\"10000\"/>\n"
             "   <account id=\"223456\" balance=\"10000\"/>\n"
