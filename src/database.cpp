@@ -106,14 +106,15 @@ void Database::insert_buy_order(string stock_id, string account_id, double num, 
 
 void Database::insert_transaction(int trans_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Inserting transaction" << endl;
+    cout << trans_id << " " << account_id << " " << stock_id << " " << num << " " << price << " " << status << endl;
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + to_string(trans_id) + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
     work W(*C);
     cout << "test insert trsaction" << endl;
+    
     W.exec(sql);
     cout << "tt" << endl;
     W.commit();
 }
-
 
 void Database::update_account(string account_id, double balance){
     cout << "Updating account" << endl;
