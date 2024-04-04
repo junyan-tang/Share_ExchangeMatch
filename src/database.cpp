@@ -73,9 +73,13 @@ void Database::insert_account(string account_id, double balance){
 void Database::insert_stock(string stock_id, string account_id, double num){
     cout << "Inserting stock" << endl;
     string sql = "INSERT INTO SHARE (SHAREID, ACCOUNT_ID, NUM) VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ");";
-    work W(*C);
-    W.exec(sql);
-    W.commit();
+    try{
+        work W(*C);
+        W.exec(sql);
+        W.commit();
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
 }
 
 void Database::insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp){
