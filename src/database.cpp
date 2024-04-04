@@ -108,8 +108,19 @@ void Database::insert_transaction(int transaction_id, string account_id, string 
     cout << "Inserting transaction" << endl;
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + to_string(transaction_id) + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
     work W(*C);
-    W.exec(sql);
-    W.commit();
+    cout << "this is insert begin" << endl;
+    try {
+        work W(*C);
+        // Use exec_params to safely insert data into the database
+        W.exec_params(sql, transaction_id, account_id, stock_id, num, price, status);
+        W.commit(); // Commit inside the try block only if no exceptions were thrown
+        cout << "Transaction inserted successfully." << endl;
+    } catch (const exception& e) {
+        // Corrected method to get the exception message
+        cout << "Error: " << e.what() << endl;
+    }
+
+
 }
 
 
