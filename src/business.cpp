@@ -45,9 +45,9 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     vector<Transaction> trans_history;
     double shares = stod(amount);
     double price = stod(limit);
-    auto now = chrono::system_clock::now();
-    time_t now_c = chrono::system_clock::to_time_t(now);
-    string timestamp = ctime(&now_c);
+    auto now = std::chrono::system_clock::now();
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    std::string timestamp = std::to_string(now_sec);
     Transaction curr = {sym, account_id, shares, price, timestamp, ""};
     trans_history.push_back(curr);
     if (shares < 0){
@@ -62,8 +62,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
         if(curr_shares >= abs(shares)){
             db.insert_sell_order(sym, account_id, abs(shares), price, timestamp);
             db.update_stock(sym, account_id, curr_shares + shares);
-            db.insert_transaction(trans_id, account_id, sym, shares, price, "open");
-            cout << "test4" << endl;
+            db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
@@ -77,7 +76,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
         if (balance > money) {
             db.insert_buy_order(sym, account_id, shares, price, timestamp);
             db.update_account(account_id, balance - money);
-            db.insert_transaction(trans_id, account_id, sym, shares, price, "open");
+            db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
         }
         else{
@@ -91,8 +90,11 @@ ResultT Transact::cancelOrder(int trans_id){
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
+    auto now = std::chrono::system_clock::now();
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    std::string timestamp = std::to_string(now_sec);
     if (R.size() != 0){
-        db.update_transaction(trans_id, "canceled");
+        db.update_transaction(trans_id, timestamp, "canceled");
         R = db.inquire_transaction(trans_id);
         for (result::iterator i = R.begin(); i != R.end(); ++i){
             Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<double>(), i[3].as<double>(), i[4].as<string>(), "canceled"};
@@ -107,16 +109,18 @@ ResultT Transact::cancelOrder(int trans_id){
 }
 
 ResultT Transact::queryOrder(int trans_id){
-
-    cout << "test 0" << endl;
     result R = db.inquire_transaction(trans_id);
-    cout << "test 1" << endl;
     ResultT res;
     vector<Transaction> trans_history;
     if (R.size() != 0){
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<double>(), i[3].as<double>(), i[4].as<string>(), i[5].as<string>()};
-            trans_history.push_back(curr_trans);
+            try{
+                Transaction curr_trans = {i[3].as<string>(), i[2].as<string>(), i[4].as<double>(), i[5].as<double>(), i[1].as<string>(), i[6].as<string>()};
+                trans_history.push_back(curr_trans);
+            }
+            catch (const std::exception& e){
+                cout << e.what() << endl;
+            }
         }
         res = {"", "query", trans_id, "", "success", "", trans_history};
     }

@@ -15,46 +15,13 @@ string XMLParser::parseRequest(string xml){
         response = responseForCreate(creation_result);
     } 
     else if (doc.child("transactions")){
-        //cout << "Processing transaction" << endl;
         vector<ResultT> transaction_result = processTransaction(doc.child("transactions"));
-        //cout << "Generating response" << endl;
         response = responseForTransaction(transaction_result);
-        //cout<< "Response generated" << endl;
     } else {
         return "invalid request";
     }
     return response;
 }
-
-// vector<ResultC> XMLParser::generateCreate(string xml){
-//     pugi::xml_document doc;
-//     vector<ResultC> results;
-//     if(!doc.load_string(xml.c_str())){
-//         cout << "Invalid XML" << endl;
-//         return results;
-//     }
-//     if (doc.child("create")){
-//         results = processCreate(doc.child("create"));
-//     } else {
-//         cout << "Invalid request" << endl;
-//     }
-//     return results;
-// }
-
-// vector<ResultT> XMLParser::generateTransaction(string xml){
-//     pugi::xml_document doc;
-//     vector<ResultT> results;
-//     if(!doc.load_string(xml.c_str())){
-//         cout << "Invalid XML" << endl;
-//         return results;
-//     }
-//     if (doc.child("transaction")){
-//         results = processTransaction(doc.child("transaction"));
-//     } else {
-//         cout << "Invalid request" << endl;
-//     }
-//     return results;
-// }
 
 vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
     vector<ResultC> results;
@@ -114,7 +81,6 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
         }
         pugi::xml_node trans_type = node.first_child();
         while (trans_type){
-            cout << "Processing transaction test test" << endl;
             if (string(trans_type.name()) == "order"){
                 cout << "Processing order" << endl;
                 string sym = trans_type.attribute("sym").value();
@@ -130,17 +96,10 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "query") {
-                cout << "Processing query" << endl;
-        
-                    
+                cout << "Processing query" << endl;  
                 string transaction_id = trans_type.attribute("id").value();
-                cout << trans_type.attribute("id").value() << endl;
                 ResultT current_result = transactor.queryOrder(stoi(transaction_id));
-                cout << "test test test" << endl;
                 results.push_back(current_result);
-                cout << "finish query" << endl;
-
- 
             }
             trans_type = trans_type.next_sibling();
         }

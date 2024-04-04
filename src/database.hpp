@@ -25,7 +25,7 @@ public:
     void insert_stock(string stock_id, string account_id, double num);
     void insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp);
     void insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp);
-    void insert_transaction(int transaction_id, string account_id, string stock_id, double num, double price, string status);
+    void insert_transaction(int transaction_id, string timestamp, string account_id, string stock_id, double num, double price, string status);
 
 
 
@@ -34,7 +34,7 @@ public:
     void update_sell_order(string stock_id, string account_id, double num, double price,string timestamp);
     void update_buy_order(string stock_id, string account_id, double num, double price,string timestamp);
     void update_transaction(int transaction_id, string account_id, string stock_id, double num, double price, string status);
-    void update_transaction(int transaction_id, string status);
+    void update_transaction(int transaction_id, string timestamp, string status);
 
     void delete_account(string account_id);
     void delete_stock(string stock_id);
