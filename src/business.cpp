@@ -107,7 +107,10 @@ ResultT Transact::cancelOrder(int trans_id){
 }
 
 ResultT Transact::queryOrder(int trans_id){
+
+    cout << "test 0" << endl;
     result R = db.inquire_transaction(trans_id);
+    cout << "test 1" << endl;
     ResultT res;
     vector<Transaction> trans_history;
     if (R.size() != 0){

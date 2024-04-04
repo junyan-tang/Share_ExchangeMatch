@@ -107,13 +107,28 @@ void Database::insert_buy_order(string stock_id, string account_id, double num, 
 void Database::insert_transaction(int trans_id, string account_id, string stock_id, double num, double price, string status){
     cout << "Inserting transaction" << endl;
     cout << trans_id << " " << account_id << " " << stock_id << " " << num << " " << price << " " << status << endl;
-    string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE) VALUES ('" + to_string(trans_id) + "', '" + account_id + "', '" + stock_id + "', " + to_string(num) + ", " + to_string(price) + ");";
-    work W(*C);
-    cout << "test insert trsaction" << endl;
-    
-    W.exec(sql);
-    cout << "tt" << endl;
-    W.commit();
+    string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SHARE_ID, NUM, PRICE, STATUS) VALUES ('" + 
+                to_string(trans_id) + "', '" + 
+                account_id + "', '" + 
+                stock_id + "', " + 
+                to_string(num) + ", " + 
+                to_string(price) + ", '" + 
+                status + "');";
+
+    cout << "this is the sql: " << sql << endl;
+    try {
+        work W(*C);
+        // Use exec_params to safely insert data into the database
+        W.exec(sql);
+        W.commit(); // Commit inside the try block only if no exceptions were thrown
+        cout << "Transaction inserted successfully." << endl;
+    } catch (const exception& e) {
+        // Corrected method to get the exception message
+        
+        cout << "Error: " << e.what() << endl;
+    }
+
+
 }
 
 void Database::update_account(string account_id, double balance){

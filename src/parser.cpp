@@ -131,9 +131,16 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
             }
             else if (string(trans_type.name()) == "query") {
                 cout << "Processing query" << endl;
+        
+                    
                 string transaction_id = trans_type.attribute("id").value();
+                cout << trans_type.attribute("id").value() << endl;
                 ResultT current_result = transactor.queryOrder(stoi(transaction_id));
+                cout << "test test test" << endl;
                 results.push_back(current_result);
+                cout << "finish query" << endl;
+
+ 
             }
             trans_type = trans_type.next_sibling();
         }
