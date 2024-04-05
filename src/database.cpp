@@ -21,14 +21,14 @@ void Database::create_table(){
             "BALANCE NUMERIC NOT NULL);";
 
     sql += "CREATE TABLE SHARE("
-            "ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "ID SERIAL PRIMARY KEY,"
             "SHAREID TEXT NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "NUM NUMERIC NOT NULL);";
 
 
     sql += "CREATE TABLE SELL_ORDER("
-            "SHARE_ID TEXT REFERENCES SHARE(SHAREID) NOT NULL,"
+            "SHARE_ID TEXT NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
@@ -36,7 +36,7 @@ void Database::create_table(){
             "PRIMARY KEY (ACCOUNT_ID, SHARE_ID));";
 
     sql += "CREATE TABLE BUY_ORDER("
-            "SHARE_ID TEXT REFERENCES SHARE(SHAREID) NOT NULL,"
+            "SHARE_ID TEXT NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
@@ -48,7 +48,7 @@ void Database::create_table(){
             "TRANSACTION_ID INT NOT NULL,"
             "TIME TEXT NOT NULL,"
             "ACCOUNT_ID TEXT REFERENCES ACCOUNT(ACCOUNT_ID) NOT NULL,"
-            "SHARE_ID TEXT REFERENCES SHARE(SHAREID) NOT NULL,"
+            "SHARE_ID TEXT NOT NULL,"
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
             "STATUS TEXT NOT NULL);";

@@ -48,12 +48,13 @@ int main(int argc, char *argv[]) {
 
     data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<create>\n"
-            "   <account id=\"123456\" balance=\"10000\"/>\n"
-            "   <account id=\"223456\" balance=\"10000\"/>\n"
-            "   <account id=\"323456\" balance=\"10000\"/>\n"
-            "   <account id=\"423456\" balance=\"10000\"/>\n"
-            "   <account id=\"523456\" balance=\"10000\"/>\n"
-            "   <account id=\"623456\" balance=\"10000\"/>\n"
+            "   <account id=\"123456\" balance=\"1000000\"/>\n"
+            "   <account id=\"223456\" balance=\"1000000\"/>\n"
+            "   <account id=\"323456\" balance=\"1000000\"/>\n"
+            "   <account id=\"423456\" balance=\"1000000\"/>\n"
+            "   <account id=\"523456\" balance=\"1000000\"/>\n"
+            "   <account id=\"623456\" balance=\"1000000\"/>\n"
+            "   <account id=\"723456\" balance=\"1000000\"/>\n"
             "   <symbol sym=\"SPY\">\n"
             "       <account id=\"123456\">10000</account>\n"
             "       <account id=\"223456\">10000</account>\n"
@@ -61,6 +62,7 @@ int main(int argc, char *argv[]) {
             "       <account id=\"423456\">10000</account>\n"
             "       <account id=\"523456\">10000</account>\n"
             "       <account id=\"623456\">10000</account>\n"
+            "       <account id=\"723456\">10000</account>\n"
             "   </symbol>\n"
             "</create>\n";
 
@@ -128,20 +130,35 @@ int main(int argc, char *argv[]) {
     cout << data6 << "\n======" << endl;
 
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    "<transactions id=\"323456\">\n"
-                    "<query id=\"1\"/>\n"
-                    "<query id=\"2\"/>\n"
-                    "<query id=\"3\"/>\n"
-                    "<query id=\"4\"/>\n"
-                    "<query id=\"5\"/>\n"
-                    "<query id=\"6\"/>\n"
-                    "<query id=\"7\"/>\n"
-                    "</transactions>\n";
+                "<transactions id=\"323456\">\n"
+                "   <query id=\"1\"/>\n"
+                "   <query id=\"2\"/>\n"
+                "   <query id=\"3\"/>\n"
+                "   <query id=\"4\"/>\n"
+                "   <query id=\"5\"/>\n"
+                "   <query id=\"6\"/>\n"
+                "</transactions>\n";
 
     data7 = resize_data(data7);
 
     send_data(sockfd, data7);
     cout << data7 << "\n======" << endl;
+
+    string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    "<transactions id=\"723456\">\n"
+                    "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
+                    "   <query id=\"1\"/>\n"
+                    "   <query id=\"2\"/>\n"
+                    "   <query id=\"3\"/>\n"
+                    "   <query id=\"4\"/>\n"
+                    "   <query id=\"5\"/>\n"
+                    "   <query id=\"6\"/>\n"
+                    "</transactions>\n";
+
+    data8 = resize_data(data8);
+
+    send_data(sockfd, data8);
+    cout << data8 << "\n======" << endl;
 
     close(sockfd);
     freeaddrinfo(res);

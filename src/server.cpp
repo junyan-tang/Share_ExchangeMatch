@@ -112,13 +112,13 @@ void Server::process() {
 
   pool.enqueue([this, new_fd] {
     int a = 0;
-    while(a<5){
+    while(a < 10){
       string data = recv_request(new_fd);
       cout << "receive data in server: " << data << endl; 
       XMLParser parser;
       string re = parser.parseRequest(data);
       cout << "here is response: " << re << endl;
-      a+= 1;
+      a += 1;
     }
     close(new_fd);
   });

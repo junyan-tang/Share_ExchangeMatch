@@ -150,14 +150,10 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
     declaration.append_attribute("encoding") = "UTF-8";
 
     auto root = doc.append_child("results");
-    cout << results.size() << endl;
-
+    
     for(const ResultT& result : results) {
-        cout << result.status << endl;
-        cout << result.message << endl;
         if (result.status == "success") {
             if (result.transaction_type == "order") {
-                cout << "Order success" << endl;
                 auto opened = root.append_child("opened");
                 opened.append_attribute("sym") = result.transaction[0].stock_id.c_str();
                 opened.append_attribute("amount") = result.transaction[0].num;
@@ -168,12 +164,12 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
             else{
                 pugi::xml_node operation;
                 if(result.transaction_type == "cancel"){
-                    cout << "Cancel success" << endl;
                     operation = root.append_child("canceled");
+                    operation.append_attribute("id") = result.trans_id;
                 }
                 else if(result.transaction_type == "query"){
-                    cout << "Query success" << endl;
                     operation = root.append_child("status");
+                    operation.append_attribute("id") = result.trans_id;
                 }
                 for (const auto& transaction : result.transaction) {
                     if (transaction.status == "open") {

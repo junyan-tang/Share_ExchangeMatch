@@ -114,13 +114,9 @@ ResultT Transact::queryOrder(int trans_id){
     vector<Transaction> trans_history;
     if (R.size() != 0){
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-            try{
-                Transaction curr_trans = {i[3].as<string>(), i[2].as<string>(), i[4].as<double>(), i[5].as<double>(), i[1].as<string>(), i[6].as<string>()};
-                trans_history.push_back(curr_trans);
-            }
-            catch (const std::exception& e){
-                cout << e.what() << endl;
-            }
+          
+            Transaction curr_trans = {i[3].as<string>(), i[2].as<string>(), i[4].as<double>(), i[5].as<double>(), i[1].as<string>(), i[6].as<string>()};
+            trans_history.push_back(curr_trans);
         }
         res = {"", "query", trans_id, "", "success", "", trans_history};
     }
