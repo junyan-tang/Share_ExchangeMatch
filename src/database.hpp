@@ -6,6 +6,7 @@
 #include <pqxx/pqxx>
 #include <fstream>
 #include "global_var.hpp"
+#include "myStruct.h"
 
 using namespace std;
 using namespace pqxx;
@@ -23,8 +24,8 @@ public:
 
     void insert_account(string account_id, double balance);
     void insert_stock(string stock_id, string account_id, double num);
-    void insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp);
-    void insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp);
+    void insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp, string transaction_id);
+    void insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp, string transaction_id);
     void insert_transaction(int transaction_id, string timestamp, string account_id, string stock_id, double num, double price, string status);
 
 
@@ -47,6 +48,11 @@ public:
     result inquire_account(string account_id);
     result inquire_stock(string stock_id, string account_id);
     result inquire_transaction(int transaction_id);
+
+
+    vector<Order> retrieve_sell_order();
+    vector<Order> retrieve_buy_order();
+
 
 };
 

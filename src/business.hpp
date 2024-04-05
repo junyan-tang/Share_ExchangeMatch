@@ -4,6 +4,8 @@
 #include "database.hpp"
 #include "myStruct.h"
 #include <string>
+#include "market.hpp"
+
 
 using namespace std;
 using namespace pqxx;
@@ -11,6 +13,7 @@ using namespace pqxx;
 class Transact {
 private:
     Database db;
+    market mkt = market(db); 
 public:
     ResultT openOrder(string account_id, string stock_id, string amount, string limit, int trans_id);
     ResultT cancelOrder(int trans_id);

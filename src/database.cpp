@@ -1,4 +1,5 @@
 #include "database.hpp"
+#include "myStruct.h"
 
 void Database::drop_table(){
     cout << "Dropping table" << endl;
@@ -33,6 +34,7 @@ void Database::create_table(){
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
             "ORDER_TIME TEXT,"
+            "TRANSACTION_ID NOT NULL,"
             "PRIMARY KEY (ACCOUNT_ID, SHARE_ID));";
 
     sql += "CREATE TABLE BUY_ORDER("
@@ -41,6 +43,7 @@ void Database::create_table(){
             "NUM NUMERIC NOT NULL,"
             "PRICE NUMERIC NOT NULL,"
             "ORDER_TIME TEXT,"
+            "TRANSACTION_ID NOT NULL,"
             "PRIMARY KEY (ACCOUNT_ID, SHARE_ID));";
 
 
@@ -84,26 +87,26 @@ void Database::insert_stock(string stock_id, string account_id, double num){
     }
 }
 
-void Database::insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp){
+void Database::insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp, string transaction_id){
     cout << "Inserting sell order" << endl;
-    try{
-        string sql = "INSERT INTO SELL_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME) "
+    string sql = "INSERT INTO SELL_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
                  "VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", "
-                 + to_string(price) + ", '" + timestamp + "');";
-    work W(*C);
-    W.exec(sql);
-    W.commit();
+                 + to_string(price) + ", '" + timestamp + "', " + to_string(transaction_id) + ");";
+    try{
+        work W(*C);
+        W.exec(sql);
+        W.commit();
     } catch (const exception& e) {
         cout << "Error: " << e.what() << endl;
     }
-    
 }
 
-void Database::insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp){
+
+void Database::insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp, string transaction_id){
     cout << "Inserting buy order" << endl;
-    string sql = "INSERT INTO BUY_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME) "
+    string sql = "INSERT INTO BUY_ORDER (SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
                  "VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", "
-                 + to_string(price) + ", '" + timestamp + "');";
+                 + to_string(price) + ", '" + timestamp + "', " + to_string(transaction_id) + ");";
     work W(*C);
     W.exec(sql);
     W.commit();
@@ -265,6 +268,32 @@ result Database::inquire_transaction(int transaction_id){
     result R = W.exec(sql);
     W.commit();
     return R;
+}
+
+vector<Order> Database::retrieve_sell_order(){
+    string sql = "SELECT SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID FROM SELL_ORDER;";
+    work W(*C);
+    result R = W.exec(sql);
+    W.commit();
+    vector<Order> res;
+    for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+    
+        Order curr = {c[0].as<string>(), c[1].as<string>(), c[2].as<double>(), c[3].as<double>(), c[4].as<string>(), c[5].as<string>()};
+        res.push_back(curr);
+    }
+    return res;
+}
+vector<Order> Database::retrieve_buy_order(){
+    string sql = "SELECT SHARE_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID FROM BUY_ORDER;";
+    work W(*C);
+    result R = W.exec(sql);
+    W.commit();
+    vector<Order> res;
+    for (result::const_iterator c = R.begin(); c != R.end(); ++c) {
+        Order curr = {c[0].as<string>(), c[1].as<string>(), c[2].as<double>(), c[3].as<double>(), c[4].as<string>()};
+        res.push_back(curr);
+    }
+    return res;
 }
 
 

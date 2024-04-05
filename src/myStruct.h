@@ -12,6 +12,7 @@ struct Order {
     int num;
     double price;
     string order_time; 
+    string transaction_id;
 };
 
 struct Transaction {
@@ -21,6 +22,7 @@ struct Transaction {
     double price;
     string order_time; 
     string status;
+
 };
 
 

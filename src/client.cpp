@@ -69,6 +69,7 @@ int main(int argc, char *argv[]) {
     data = resize_data(data);
     send_data(sockfd, data);
     cout << data << "\n======" << endl;
+    sleep(1);
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<transactions id=\"123456\">\n"
@@ -79,6 +80,7 @@ int main(int argc, char *argv[]) {
     data1 = resize_data(data1);
     send_data(sockfd, data1);
     cout << data1 << "\n======" << endl;
+        sleep(1);
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"223456\">\n"
@@ -90,6 +92,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data2);
     cout << data2 << "\n======" << endl;
+        sleep(1);
 
     string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"323456\">\n"
@@ -101,6 +104,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data3);
     cout << data3 << "\n======" << endl;
+        sleep(1);
 
     string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"423456\">\n"
@@ -110,6 +114,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data4);
     cout << data4 << "\n======" << endl;
+        sleep(1);
 
     string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"523456\">\n"
@@ -119,6 +124,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data5);
     cout << data5 << "\n======" << endl;
+        sleep(1);
 
     string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"623456\">\n"
@@ -128,6 +134,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data6);
     cout << data6 << "\n======" << endl;
+        sleep(1);
 
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<transactions id=\"323456\">\n"
@@ -143,6 +150,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data7);
     cout << data7 << "\n======" << endl;
+        sleep(1);
 
     string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                     "<transactions id=\"723456\">\n"
@@ -159,6 +167,7 @@ int main(int argc, char *argv[]) {
 
     send_data(sockfd, data8);
     cout << data8 << "\n======" << endl;
+        sleep(1);
 
     close(sockfd);
     freeaddrinfo(res);

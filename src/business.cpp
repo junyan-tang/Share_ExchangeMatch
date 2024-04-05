@@ -83,6 +83,8 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
         }
     }
+    
+    mkt.match_sell();
     return res;
 }
 
