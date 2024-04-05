@@ -1,27 +1,6 @@
 #include "market.hpp"
 #include <algorithm>
-
-// void market::add_sell_order(Order order){
-//     sell_orders[order.stock_id].push_back(order);
-// }
-
-// void market::add_buy_order(Order order){
-//     buy_orders[order.stock_id].push_back(order);
-// }
-
-
-
-// void market::update_sell_orders(Order new_order) {
-//     update_orders(sell_orders, new_order);
-// }
-
-// void market::update_buy_orders(Order new_order) {
-//     update_orders(buy_orders, new_order);
-// }
-
-
 void market::update_orders(){
-
     sell_orders = convertToMap(db.retrieve_sell_order());
     buy_orders = convertToMap(db.retrieve_buy_order());
     cout << "this is sell_orders" << endl;
@@ -77,9 +56,14 @@ Transaction market::match_sell() {
                     transaction.price = sell_it->price;
                     transaction.order_time = sell_it->order_time;
                     transaction.status = "sell";
-                    cout << "this is transactino ====" << endl;
+                    cout << "this is transaction ====" << endl;
                     cout << "transaction: " << transaction.stock_id << " " << transaction.account_id << " " << transaction.num << " " << transaction.price << " " << transaction.order_time << " " << transaction.status << endl;
                     cout << "\n ======= " << endl;
+
+                    db.update_transaction(sell_it->transaction_id, sell_it->order_time, "executed");
+                    sentStock(buy_it->account_id, buy_it->stock_id, match_quantity);
+                    db.update_transaction(buy_it->transaction_id, buy_it->order_time, "executed");
+                    sentMoney(sell_it->account_id, match_quantity * sell_it->price);
 
                     //update order
                     sell_it->num -= match_quantity;
@@ -88,11 +72,14 @@ Transaction market::match_sell() {
                     //delete buy order if num < 0
                     if (buy_it->num <= 0) {
                         buy_it = waitlist.erase(buy_it);
+                        
+
                     } else {
                         ++buy_it;
+
+                        db.update_transaction(buy_it->transaction_id, buy_it->order_time, "executed");
+                        db.update_buy_order(buy_it->stock_id, buy_it->order_time, buy_it->num, buy_it->price, buy_it->account_id);
                     }
-
-
                     //update database
                     //update sell order
                     //db.update_transaction(sell_it->order_id, sell_it->order_time, "closed");
@@ -113,7 +100,14 @@ Transaction market::match_sell() {
     return transaction;
 }
 
+void market::sentStock(string account_id, string stock_id, double amount) {
+    result res = db.inquire_stock(stock_id, account_id);
+    double curr_shares = res.begin()[2].as<double>();
+    db.update_stock(stock_id, account_id, amount + curr_shares);
+}
 
-market::~market() {
-    // Empty body
+void market::sentMoney(string account_id, double amount) {
+    result res = db.inquire_account(account_id);
+    double balance = res.begin()[1].as<double>();
+    db.update_account(account_id, amount + balance);
 }

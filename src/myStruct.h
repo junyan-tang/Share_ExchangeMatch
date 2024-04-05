@@ -9,7 +9,7 @@ using namespace std;
 struct Order {
     string stock_id;
     string account_id;
-    int num;
+    double num;
     double price;
     string order_time; 
     string transaction_id;
@@ -22,7 +22,6 @@ struct Transaction {
     double price;
     string order_time; 
     string status;
-
 };
 
 
@@ -36,17 +35,11 @@ struct ResultC {
 struct ResultT{
     string account_id;
     string transaction_type;
-    int trans_id;
+    string trans_id;
     string sym;
     string status;
     string message;
     vector<Transaction> transaction;
 };
-
-// struct Transaction{
-//     string transaction_id
-//     vector<Order, status> orders;
-//     string status;
-// }
 
 #endif

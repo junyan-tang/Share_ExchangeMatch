@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<transactions id=\"123456\">\n"
-            "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
+            "<order sym=\"SPY\" amount=\"200\" limit=\"127\"/>\n"
             "<query id=\"78910\"/>\n"
             "<cancel id=\"78910\"/>\n"
             "</transactions>\n";
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"223456\">\n"
-        "<order sym=\"SPY\" amount=\"-100\" limit=\"130\"/>\n"
+        "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
         "<query id=\"1\"/>\n"
         "</transactions>\n";
 
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
 
     string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"323456\">\n"
-        "<order sym=\"SPY\" amount=\"200\" limit=\"127\"/>\n"
-        "<query id=\"1\"/>\n"
+        "<order sym=\"SPY\" amount=\"400\" limit=\"125\"/>\n"
+        "<cancel id=\"1\"/>\n"
         "</transactions>\n";
 
     data3 = resize_data(data3);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
     string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"423456\">\n"
-        "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
+        "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
         "</transactions>\n";
     data4 = resize_data(data4);
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 
     string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"523456\">\n"
-        "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
+        "<order sym=\"SPY\" amount=\"-100\" limit=\"130\"/>\n"
         "</transactions>\n";
     data5 = resize_data(data5);
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 
     string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"623456\">\n"
-        "<order sym=\"SPY\" amount=\"400\" limit=\"125\"/>\n"
+        "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
         "</transactions>\n";
     data6 = resize_data(data6);
 
@@ -137,7 +137,18 @@ int main(int argc, char *argv[]) {
         sleep(1);
 
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                "<transactions id=\"323456\">\n"
+                "<transactions id=\"723456\">\n"
+                "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
+                "</transactions>\n";
+
+    data7 = resize_data(data7);
+
+    send_data(sockfd, data7);
+    cout << data7 << "\n======" << endl;
+    sleep(1);
+
+    string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                "<transactions id=\"723456\">\n"
                 "   <query id=\"1\"/>\n"
                 "   <query id=\"2\"/>\n"
                 "   <query id=\"3\"/>\n"
@@ -146,28 +157,11 @@ int main(int argc, char *argv[]) {
                 "   <query id=\"6\"/>\n"
                 "</transactions>\n";
 
-    data7 = resize_data(data7);
-
-    send_data(sockfd, data7);
-    cout << data7 << "\n======" << endl;
-        sleep(1);
-
-    string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    "<transactions id=\"723456\">\n"
-                    "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
-                    "   <query id=\"1\"/>\n"
-                    "   <query id=\"2\"/>\n"
-                    "   <query id=\"3\"/>\n"
-                    "   <query id=\"4\"/>\n"
-                    "   <query id=\"5\"/>\n"
-                    "   <query id=\"6\"/>\n"
-                    "</transactions>\n";
-
     data8 = resize_data(data8);
 
     send_data(sockfd, data8);
     cout << data8 << "\n======" << endl;
-        sleep(1);
+    sleep(1);
 
     close(sockfd);
     freeaddrinfo(res);

@@ -40,7 +40,7 @@ ResultC Creation::createStock(string sym, string account_id, double amount){
     return res;
 }
 
-ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, int trans_id){
+ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, string trans_id){
     ResultT res;
     vector<Transaction> trans_history;
     double shares = stod(amount);
@@ -60,7 +60,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             curr_shares = R.begin()[2].as<double>();
         }
         if(curr_shares >= abs(shares)){
-            db.insert_sell_order(sym, account_id, abs(shares), price, timestamp);
+            db.insert_sell_order(sym, account_id, abs(shares), price, timestamp, trans_id);
             db.update_stock(sym, account_id, curr_shares + shares);
             db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
@@ -74,7 +74,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
         double balance = R.begin()[1].as<double>();
         double money = shares * price;
         if (balance > money) {
-            db.insert_buy_order(sym, account_id, shares, price, timestamp);
+            db.insert_buy_order(sym, account_id, shares, price, timestamp, trans_id);
             db.update_account(account_id, balance - money);
             db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
             res = {account_id, "order", trans_id, sym, "success", "", trans_history};
@@ -83,12 +83,13 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
             res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
         }
     }
-    
     mkt.match_sell();
     return res;
 }
 
-ResultT Transact::cancelOrder(int trans_id){
+
+
+ResultT Transact::cancelOrder(string trans_id){
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
@@ -96,10 +97,27 @@ ResultT Transact::cancelOrder(int trans_id){
     auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
     std::string timestamp = std::to_string(now_sec);
     if (R.size() != 0){
+        db.delete_buy_order(trans_id);
+        db.delete_sell_order(trans_id);
         db.update_transaction(trans_id, timestamp, "canceled");
         R = db.inquire_transaction(trans_id);
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-            Transaction curr_trans = {i[0].as<string>(), i[1].as<string>(), i[2].as<double>(), i[3].as<double>(), i[4].as<string>(), "canceled"};
+            string trans_id = i[0].as<string>();
+            string timestamp = i[1].as<string>();
+            string account_id = i[2].as<string>();
+            string stock_id = i[3].as<string>();
+            double num = i[4].as<double>();
+            double price = i[5].as<double>();
+            string status = i[6].as<string>();
+            if (status == "canceled") {
+                if (num < 0) {
+                    sentStock(account_id, stock_id, abs(num));
+                }
+                else {
+                    sentMoney(account_id, num * price);
+                }
+            }
+            Transaction curr_trans = {stock_id, account_id, num, price, timestamp, status};
             trans_history.push_back(curr_trans);
         }
         res = {"", "cancel", trans_id, "", "success", "", trans_history};
@@ -110,13 +128,13 @@ ResultT Transact::cancelOrder(int trans_id){
     return res;
 }
 
-ResultT Transact::queryOrder(int trans_id){
+ResultT Transact::queryOrder(string trans_id){
+    db.show_table("transaction");
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
     if (R.size() != 0){
         for (result::iterator i = R.begin(); i != R.end(); ++i){
-          
             Transaction curr_trans = {i[3].as<string>(), i[2].as<string>(), i[4].as<double>(), i[5].as<double>(), i[1].as<string>(), i[6].as<string>()};
             trans_history.push_back(curr_trans);
         }

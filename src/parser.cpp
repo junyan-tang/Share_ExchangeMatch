@@ -2,11 +2,9 @@
 #include "myStruct.h"
 #include <vector>
 
-// int transaction_id = 0;
 string XMLParser::parseRequest(string xml){
     pugi::xml_document doc;
     string response;
-    //cout << "Parsing request" << endl;
     if(!doc.load_string(xml.c_str())){
         return "invalid xml";
     }
@@ -62,50 +60,47 @@ vector<ResultC> XMLParser::processCreate(const pugi::xml_node &node){
 
 vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node){
     vector<ResultT> results;
-    transaction_id++;
     if(node.attribute("id")){
         string account_id = node.attribute("id").value();
         if(!transactor.checkAccount(account_id)){
             pugi::xml_node curr_node = node.first_child();
             while(curr_node){
-                ResultT current_result = {"", "", stoi(account_id), "", "error", "This account is invalid", {}};
+                ResultT current_result = {"", "", account_id, "", "error", "This account is invalid", {}};
                 results.push_back(current_result);
                 curr_node = curr_node.next_sibling();
             }
             return results;
         }
         if (!node.first_child()) {
-            ResultT current_result = {"", "", transaction_id, "", "error", "No transaction included", {}};
+            ResultT current_result = {"", "", account_id, "", "error", "No transaction included", {}};
             results.push_back(current_result);
             return results;
         }
         pugi::xml_node trans_type = node.first_child();
         while (trans_type){
             if (string(trans_type.name()) == "order"){
-                cout << "Processing order" << endl;
+                transaction_id++;
                 string sym = trans_type.attribute("sym").value();
                 string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
-                ResultT current_result = transactor.openOrder(account_id, sym, amount, limit, transaction_id);
+                ResultT current_result = transactor.openOrder(account_id, sym, amount, limit, to_string(transaction_id));
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "cancel") {
-                cout << "Processing cancel" << endl;
                 string transaction_id = trans_type.attribute("id").value();
-                ResultT current_result = transactor.cancelOrder(stoi(transaction_id));
+                ResultT current_result = transactor.cancelOrder(transaction_id);
                 results.push_back(current_result);
             }
             else if (string(trans_type.name()) == "query") {
-                cout << "Processing query" << endl;  
                 string transaction_id = trans_type.attribute("id").value();
-                ResultT current_result = transactor.queryOrder(stoi(transaction_id));
+                ResultT current_result = transactor.queryOrder(transaction_id);
                 results.push_back(current_result);
             }
             trans_type = trans_type.next_sibling();
         }
     }
     else{
-        ResultT current_result = {"", "", transaction_id, "", "error", "No account id included", {}};
+        ResultT current_result = {"", "", to_string(transaction_id), "", "error", "No account id included", {}};
         results.push_back(current_result);
     }
     return results;
@@ -158,18 +153,18 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
                 opened.append_attribute("sym") = result.transaction[0].stock_id.c_str();
                 opened.append_attribute("amount") = result.transaction[0].num;
                 opened.append_attribute("limit") = result.transaction[0].price;
-                opened.append_attribute("id") = to_string(result.trans_id).c_str();
+                opened.append_attribute("id") = result.trans_id.c_str();
 
             }
             else{
                 pugi::xml_node operation;
                 if(result.transaction_type == "cancel"){
                     operation = root.append_child("canceled");
-                    operation.append_attribute("id") = result.trans_id;
+                    operation.append_attribute("id") = result.trans_id.c_str();
                 }
                 else if(result.transaction_type == "query"){
                     operation = root.append_child("status");
-                    operation.append_attribute("id") = result.trans_id;
+                    operation.append_attribute("id") = result.trans_id.c_str();
                 }
                 for (const auto& transaction : result.transaction) {
                     if (transaction.status == "open") {
@@ -200,7 +195,7 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
                 error.text().set(result.message.c_str());
             }
             else{
-                error.append_attribute("id") =  to_string(result.trans_id).c_str();
+                error.append_attribute("id") =  result.trans_id.c_str();
                 error.text().set(result.message.c_str());
             }
         }
