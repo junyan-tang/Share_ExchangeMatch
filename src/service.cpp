@@ -10,18 +10,9 @@ int main(){
         return EXIT_FAILURE;
     }
 
-
     Database db;
-
-
     db.init_database();
 
-
-
     Server server;
-
-
     server.run();
-
-    
 }

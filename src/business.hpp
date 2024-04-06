@@ -6,7 +6,6 @@
 #include <string>
 #include "market.hpp"
 
-
 using namespace std;
 using namespace pqxx;
 

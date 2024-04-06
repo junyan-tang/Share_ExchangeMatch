@@ -80,15 +80,10 @@ void Database::insert_sell_order(string stock_id, string account_id, double num,
     string sql = "INSERT INTO SELL_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
                  "VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ", "
                  + to_string(price) + ", '" + timestamp + "', " + trans_id + ");";
-    try{
-        work W(*C);
-        W.exec(sql);
-        W.commit();
-    } catch (const exception& e) {
-        cout << "Error: " << e.what() << endl;
-    }
+    work W(*C);
+    W.exec(sql);
+    W.commit();
 }
-
 
 void Database::insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp, string trans_id){
     string sql = "INSERT INTO BUY_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
@@ -100,8 +95,6 @@ void Database::insert_buy_order(string stock_id, string account_id, double num, 
 }
 
 void Database::insert_transaction(string trans_id, string timestamp,string account_id, string stock_id, double num, double price, string status){
-    cout << "Inserting transaction" << endl;
-    cout << trans_id << " " << account_id << " " << stock_id << " " << num << " " << price << " " << status << endl;
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, TIME, ACCOUNT_ID, STOCK_ID, NUM, PRICE, STATUS) VALUES ('" + 
                 trans_id + "', '" + 
                 timestamp + "', '" +
@@ -110,20 +103,12 @@ void Database::insert_transaction(string trans_id, string timestamp,string accou
                 to_string(num) + ", " + 
                 to_string(price) + ", '" + 
                 status + "');";
-    try {
-        work W(*C);
-        W.exec(sql);
-        W.commit(); 
-        cout << "Transaction inserted successfully." << endl;
-    } catch (const exception& e) {
-        cout << "Error: " << e.what() << endl;
-    }
-
-
+    work W(*C);
+    W.exec(sql);
+    W.commit(); 
 }
 
 void Database::update_account(string account_id, double balance){
-    cout << "Updating account" << endl;
     string sql = "UPDATE ACCOUNT SET BALANCE = " + to_string(balance) + " WHERE ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
@@ -131,91 +116,63 @@ void Database::update_account(string account_id, double balance){
 }
 
 void Database::update_stock(string stock_id, string account_id, double num){
-    cout << "Updating stock" << endl;
-    string sql = "UPDATE SHARE SET NUM = " + to_string(num) + " WHERE SHAREID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE SHARE SET NUM = " + to_string(num) + " WHERE SHAREID = '" + 
+                stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
 void Database::update_sell_order(string stock_id, string account_id, double num, double price, string timestamp){
-    cout << "Updating sell order" << endl;
-    string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                 "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + 
+                to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
+                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
 void Database::update_buy_order(string stock_id, string account_id, double num, double price, string timestamp){
-    cout << "Updating buy order" << endl;
-    string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                 "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+    string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + 
+                to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
+                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     work W(*C);
     W.exec(sql);
     W.commit();
 }
 
 void Database::update_transaction(string trans_id, string account_id, string stock_id, double num, double price, string status){
-    try {
-        cout << "Updating transaction" << endl;
-        string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + trans_id + "';";
-        cout << "this is sql: " << sql << endl;
-        work W(*C);
-        W.exec(sql);
-        W.commit();
-    } catch (const exception& e) {
-        cout << "Error: " << e.what() << endl;
-    }
-    
+    string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + 
+                to_string(price) + " WHERE TRANSACTION_ID = '" + trans_id + "';";
+    work W(*C);
+    W.exec(sql);
+    W.commit();   
 }
 
 void Database::update_transaction(string trans_id, string timestamp, string status){
-    try{
-       string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
-                    "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
-        
-        work W(*C);
-        W.exec(sql);
-        W.commit();
-        
-    } catch (const exception& e) {
-        cout << "Error: " << e.what() << endl;
-    }
+    string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
+                "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+    work W(*C);
+    W.exec(sql);
+    W.commit();
 }
 
 
 void Database::update_transaction(string trans_id, string timestamp, string status, double price){
-    try{
-
-        string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
-                     "', PRICE = " + to_string(price) + 
-                     " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
-        
-        work W(*C);
-        W.exec(sql);
-        W.commit();
-        
-    } catch (const exception& e) {
-        cout << "Error: " << e.what() << endl;
-    }
+    string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
+                "', PRICE = " + to_string(price) + 
+                " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+    work W(*C);
+    W.exec(sql);
+    W.commit();
 }
 
 void Database::update_transaction(string tran_id, double num){
-    try
-    {
-        string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + 
-                     " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
-
-        work W(*C);
-        W.exec(sql);
-        W.commit();
-    }
-    catch(const std::exception& e)
-    {
-        cerr << e.what() << '\n';
-    }
-    
+    string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + 
+                " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
+    work W(*C);
+    W.exec(sql);
+    W.commit();
 }
 
 void Database::delete_account(string account_id){

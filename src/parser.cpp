@@ -204,27 +204,3 @@ string XMLParser::responseForTransaction(vector<ResultT> results){
     doc.save(ss);
     return ss.str();
 }
-
-bool XMLParser::isCreate(string xml){
-    pugi::xml_document doc;
-    if(!doc.load_string(xml.c_str())){
-        cout << "Invalid XML" << endl;
-        return false;
-    }
-    if (doc.child("create")){
-        return true;
-    }
-    return false;
-}
-
-bool XMLParser::isTransaction(string xml){
-    pugi::xml_document doc;
-    if(!doc.load_string(xml.c_str())){
-        cout << "Invalid XML" << endl;
-        return false;
-    }
-    if (doc.child("transaction")){
-        return true;
-    }
-    return false;
-}

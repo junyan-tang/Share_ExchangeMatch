@@ -45,9 +45,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     vector<Transaction> trans_history;
     double shares = stod(amount);
     double price = stod(limit);
-    auto now = std::chrono::system_clock::now();
-    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    std::string timestamp = std::to_string(now_sec);
+    std::string timestamp = mkt.get_time();
     Transaction curr = {sym, account_id, shares, price, timestamp, ""};
     trans_history.push_back(curr);
     if (shares < 0){
@@ -87,15 +85,11 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     return res;
 }
 
-
-
 ResultT Transact::cancelOrder(string trans_id){
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
-    auto now = std::chrono::system_clock::now();
-    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    std::string timestamp = std::to_string(now_sec);
+    std::string timestamp = mkt.get_time();
     if (R.size() != 0){
         db.delete_buy_order(trans_id);
         db.delete_sell_order(trans_id);

@@ -8,8 +8,6 @@ Server::Server():pool(10) {
   host.ai_flags = AI_PASSIVE;
   status = getaddrinfo(NULL, PORT, &host, &host_list);
 
-
-
   if (status != 0) {
     cerr << "Error: address issue" << endl;
     exit(EXIT_FAILURE);
@@ -67,7 +65,6 @@ string Server::recv_request(int socket_fd) {
         if (bytesReceived <= 0) { 
             cout << "receive length failed with value: " << bytesReceived << endl;
             return "receive length failed";
-
         }
         if (buffer[0] == '\n') break; 
         lengthStr += buffer[0];
@@ -102,13 +99,10 @@ void Server::process() {
   sin_size = sizeof(their_addr);
   int new_fd = accept(server_sockfd, (struct sockaddr *)&their_addr, &sin_size);
 
-
   if (new_fd == -1) {
     cerr << "Error: accept fail" << endl;
     exit(EXIT_FAILURE);
   }
-
-
 
   pool.enqueue([this, new_fd] {
     int a = 0;

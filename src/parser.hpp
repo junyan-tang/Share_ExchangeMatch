@@ -18,12 +18,6 @@ public:
     vector<ResultT> processTransaction(const pugi::xml_node &node);
     string responseForCreate(vector<ResultC> results);
     string responseForTransaction(vector<ResultT> results);
-
-    vector<ResultC> generateCreate(string xml);
-    vector<ResultT> generateTransaction(string xml);
-
-    bool isCreate(string xml);
-    bool isTransaction(string xml);
 };
 
 #endif
