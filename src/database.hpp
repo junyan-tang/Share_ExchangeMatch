@@ -29,7 +29,9 @@ public:
     void update_sell_order(string stock_id, string account_id, double num, double price,string timestamp);
     void update_buy_order(string stock_id, string account_id, double num, double price,string timestamp);
     void update_transaction(string trans_id, string account_id, string stock_id, double num, double price, string status);
+    void update_transaction(string trans_id, string timestamp, string status, double price);
     void update_transaction(string trans_id, string timestamp, string status);
+    void update_transaction(string trans_id, double num);
 
     void delete_account(string account_id);
     void delete_stock(string stock_id);

@@ -160,6 +160,7 @@ void Database::update_transaction(string trans_id, string account_id, string sto
     try {
         cout << "Updating transaction" << endl;
         string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + trans_id + "';";
+        cout << "this is sql: " << sql << endl;
         work W(*C);
         W.exec(sql);
         W.commit();
@@ -170,17 +171,51 @@ void Database::update_transaction(string trans_id, string account_id, string sto
 }
 
 void Database::update_transaction(string trans_id, string timestamp, string status){
-try{
-    if (status == "canceled"){
-        string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
+    try{
+       string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
                     "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+        
+        work W(*C);
+        W.exec(sql);
+        W.commit();
+        
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+}
+
+
+void Database::update_transaction(string trans_id, string timestamp, string status, double price){
+    try{
+
+        string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp + 
+                     "', PRICE = " + to_string(price) + 
+                     " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+        
+        work W(*C);
+        W.exec(sql);
+        W.commit();
+        
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+}
+
+void Database::update_transaction(string tran_id, double num){
+    try
+    {
+        string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + 
+                     " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
+
         work W(*C);
         W.exec(sql);
         W.commit();
     }
-} catch (const exception& e) {
-    cout << "Error: " << e.what() << endl;
-}
+    catch(const std::exception& e)
+    {
+        cerr << e.what() << '\n';
+    }
+    
 }
 
 void Database::delete_account(string account_id){
