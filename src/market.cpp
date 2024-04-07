@@ -4,22 +4,20 @@
 #include <ctime>
 
 void market::print_orders(){
- cout << "this is sell_orders" << endl;
+
     for(auto& sell_pair : sell_orders){
         cout << "stock_id: " << sell_pair.first << endl;
         for(auto& order : sell_pair.second){
             cout << " stock_id: " << order.stock_id << " account_id: " << order.account_id << " num: " << order.num << " price: " << order.price << " order_time: " << order.order_time << endl;
         }
     }
-    cout << "\n=====================" << endl;
-    cout << "this is buy_orders" << endl;
     for(auto& buy_pair : buy_orders){
         cout << "stock_id: " << buy_pair.first << endl;
         for(auto& order : buy_pair.second){
             cout << " stock_id: " << order.stock_id << " account_id: " << order.account_id << " num: " << order.num << " price: " << order.price << " order_time: " << order.order_time << endl;
         }
     }
-    cout << "\n=====================" << endl;
+
 }
 void market::update_orders(){
 
@@ -52,7 +50,6 @@ Transaction market::match_sell() {
 
         auto sell_it = stock_sell_orders.begin();
         while (sell_it != stock_sell_orders.end()) {
-            cout << "this is sell_it in while: " << sell_it->stock_id << " " << sell_it->account_id << " " << sell_it->num << " " << sell_it->price << " " << sell_it->order_time << endl;
             vector<Order>& waitlist = buy_orders[sell_it->stock_id];
             sort(waitlist.begin(), waitlist.end(), [](const Order& a, const Order& b) {
                 return a.order_time < b.order_time;
@@ -74,24 +71,16 @@ Transaction market::match_sell() {
 
 
                     sentMoney(sell_it->account_id, match_quantity * match_price);
-                    cout << "old sell num: " << sell_it->num << endl;
-                    cout << "old buy num: " << buy_it->num << endl;
-                    cout << "match_quantity: " << match_quantity << endl;
+
                     sell_it->num -= match_quantity;
                     buy_it->num -= match_quantity;
 
-                    cout << "new sell_it num: " << sell_it->num << endl;
-                    cout << "new buy_it num: " << buy_it->num << endl;
-
-                    cout << "this old database===============" << endl;
                     db.show_table("transaction");
 
 
                     if (buy_it->num <= 0) {
                         string timestamp = get_time();
                         
-                        cout << "buy_it->transaction_id: " << buy_it->transaction_id << endl;
-                        cout << "buy_it->num: " << buy_it->num << endl;
                         db.update_transaction(buy_it->transaction_id, timestamp, "executed", match_price);
                         buy_it = waitlist.erase(buy_it);
        
@@ -110,7 +99,6 @@ Transaction market::match_sell() {
                         sell_it = stock_sell_orders.erase(sell_it);
 
 
-                        cout << "this new database===============" << endl;
                         db.show_table("transaction");
                         break;
 
@@ -122,7 +110,6 @@ Transaction market::match_sell() {
                     }
 
 
-                    cout << "this new database===============" << endl;
                     db.show_table("transaction");
     
                 } else {

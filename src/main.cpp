@@ -13,10 +13,7 @@ int main(){
 
     Database db;
 
-
     db.init_database();
-
-
 
     Server server;
 
