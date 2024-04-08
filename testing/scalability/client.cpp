@@ -20,7 +20,7 @@
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT "12345"
 
-#define MAX_THREAD 1
+#define MAX_THREAD 2
 #define BUFF_SIZE 10240
 
 

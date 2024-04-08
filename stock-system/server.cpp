@@ -108,8 +108,14 @@ void Server::run()
       cerr << "Error: accept fail" << endl;
       exit(EXIT_FAILURE);
     }
-    auto processFunc = std::bind(&Server::process, this, new_fd);
-    pool.commit(processFunc);
+
+
+
+    pool.enqueue([this, new_fd] {
+      process(new_fd);
+    });
+    // auto processFunc = std::bind(&Server::process, this, new_fd);
+    // pool.commit(processFunc);
   }
 }
 
