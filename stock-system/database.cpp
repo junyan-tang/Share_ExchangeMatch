@@ -3,7 +3,7 @@
 
 void Database::drop_table()
 {
-    
+
     work W(*C);
     W.exec("DROP TABLE IF EXISTS TRANSACTION CASCADE;");
     W.exec("DROP TABLE IF EXISTS BUY_ORDER CASCADE;");
@@ -64,43 +64,39 @@ void Database::init_database()
     create_table();
 }
 
-void Database::insert_account(work & W,string account_id, double balance)
+void Database::insert_account(work &W, string account_id, double balance)
 {
     string sql = "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES ('" + account_id + "', " + to_string(balance) + ");";
 
     W.exec(sql);
-
 }
 
-void Database::insert_stock(work & W,string stock_id, string account_id, double num)
+void Database::insert_stock(work &W, string stock_id, string account_id, double num)
 {
     string sql = "INSERT INTO SHARE (SHAREID, ACCOUNT_ID, NUM) VALUES ('" + stock_id + "', '" + account_id + "', " + to_string(num) + ");";
 
     W.exec(sql);
-
 }
 
-void Database::insert_sell_order(work & W, string stock_id, string account_id, double num, double price, string timestamp, string trans_id)
+void Database::insert_sell_order(work &W, string stock_id, string account_id, double num, double price, string timestamp, string trans_id)
 {
     string sql = "INSERT INTO SELL_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
                  "VALUES ('" +
                  stock_id + "', '" + account_id + "', " + to_string(num) + ", " + to_string(price) + ", '" + timestamp + "', " + trans_id + ");";
 
     W.exec(sql);
-
 }
 
-void Database::insert_buy_order(work & W, string stock_id, string account_id, double num, double price, string timestamp, string trans_id)
+void Database::insert_buy_order(work &W, string stock_id, string account_id, double num, double price, string timestamp, string trans_id)
 {
     string sql = "INSERT INTO BUY_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
                  "VALUES ('" +
                  stock_id + "', '" + account_id + "', " + to_string(num) + ", " + to_string(price) + ", '" + timestamp + "', " + trans_id + ");";
 
     W.exec(sql);
-
 }
 
-void Database::insert_transaction(work & W, string trans_id, string timestamp, string account_id, string stock_id, double num, double price, string status)
+void Database::insert_transaction(work &W, string trans_id, string timestamp, string account_id, string stock_id, double num, double price, string status)
 {
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, TIME, ACCOUNT_ID, STOCK_ID, NUM, PRICE, STATUS) VALUES ('" +
                  trans_id + "', '" +
@@ -112,119 +108,105 @@ void Database::insert_transaction(work & W, string trans_id, string timestamp, s
                  status + "');";
 
     W.exec(sql);
-    
 }
 
-void Database::update_account(work & W, string account_id, double balance)
+void Database::update_account(work &W, string account_id, double balance)
 {
     string sql = "UPDATE ACCOUNT SET BALANCE = " + to_string(balance) + " WHERE ACCOUNT_ID = '" + account_id + "';";
-   
-    W.exec(sql);
 
+    W.exec(sql);
 }
 
-void Database::update_stock(work & W, string stock_id, string account_id, double num)
+void Database::update_stock(work &W, string stock_id, string account_id, double num)
 {
     string sql = "UPDATE SHARE SET NUM = " + to_string(num) + " WHERE SHAREID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
     W.exec(sql);
-
 }
 
-void Database::update_sell_order(work & W, string stock_id, string account_id, double num, double price, string timestamp)
+void Database::update_sell_order(work &W, string stock_id, string account_id, double num, double price, string timestamp)
 {
     string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+                                                                                                                                      "WHERE STOCK_ID = '" +
+                 stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::update_buy_order(work & W, string stock_id, string account_id, double num, double price, string timestamp)
+void Database::update_buy_order(work &W, string stock_id, string account_id, double num, double price, string timestamp)
 {
     string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+                                                                                                                                     "WHERE STOCK_ID = '" +
+                 stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::update_transaction(work & W, string trans_id, string account_id, string stock_id, double num, double price, string status)
+void Database::update_transaction(work &W, string trans_id, string account_id, string stock_id, double num, double price, string status)
 {
     string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + " WHERE TRANSACTION_ID = '" + trans_id + "';";
     cout << "this is sql: " << sql << endl;
 
     W.exec(sql);
-
 }
 
-void Database::update_transaction(work & W, string trans_id, string timestamp, string status)
+void Database::update_transaction(work &W, string trans_id, string timestamp, string status)
 {
     string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp +
-                "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+                 "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
 
     W.exec(sql);
-
 }
 
-void Database::update_transaction(work & W, string trans_id, string timestamp, string status, double price)
+void Database::update_transaction(work &W, string trans_id, string timestamp, string status, double price)
 {
     string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp +
-                    "', PRICE = " + to_string(price) +
-                    " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
-
+                 "', PRICE = " + to_string(price) +
+                 " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
 
     W.exec(sql);
-
 }
 
-void Database::update_transaction(work & W, string tran_id, double num)
+void Database::update_transaction(work &W, string tran_id, double num)
 {
     string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) +
-                    " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
+                 " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
 
     W.exec(sql);
-
-
 }
 
-void Database::delete_account(work & W, string account_id)
+void Database::delete_account(work &W, string account_id)
 {
     string sql = "DELETE FROM ACCOUNT WHERE ACCOUNT_ID = '" + account_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::delete_stock(work & W, string stock_id)
+void Database::delete_stock(work &W, string stock_id)
 {
     string sql = "DELETE FROM SHARE WHERE SHAREID = '" + stock_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::delete_sell_order(work & W, string trans_id)
+void Database::delete_sell_order(work &W, string trans_id)
 {
     string sql = "DELETE FROM SELL_ORDER WHERE TRANSACTION_ID = '" + trans_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::delete_buy_order(work & W, string trans_id)
+void Database::delete_buy_order(work &W, string trans_id)
 {
     string sql = "DELETE FROM BUY_ORDER WHERE TRANSACTION_ID = '" + trans_id + "';";
 
     W.exec(sql);
-
 }
 
-void Database::delete_transaction(work & W, string trans_id)
+void Database::delete_transaction(work &W, string trans_id)
 {
     string sql = "DELETE FROM TRANSACTION WHERE TRANSACTION_ID = '" + trans_id + "';";
 
     W.exec(sql);
-
 }
 
 void Database::show_table(string table)

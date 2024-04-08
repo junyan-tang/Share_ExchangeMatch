@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  stock_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: passw0rd
+
+    volumes:
+      - ./stock-system/sql_init:/docker-entrypoint-initdb.d
+    ports:
+      - "54321:5432"
+
+  service:
+    build: ./stock-system
+    command: ./service
+    volumes:
+      - ./stock-system:/code
+    ports:
+      - "12345:12345"
+    depends_on:
+      - stock_db

@@ -106,10 +106,9 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node)
                 string sym = trans_type.attribute("sym").value();
                 string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
-                
+
                 ResultT current_result = transactor.openOrder(account_id, sym, amount, limit, to_string(transaction_id));
                 results.push_back(current_result);
-             
             }
             else if (string(trans_type.name()) == "cancel")
             {
