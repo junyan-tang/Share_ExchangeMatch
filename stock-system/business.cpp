@@ -4,58 +4,75 @@
 #include <mutex>
 std::mutex mtx;
 
-ResultC Creation::createAccount(string account_id, string balance)
-{
-    std::lock_guard<std::mutex> lck (mtx);
-    result R = db.inquire_account(account_id);
+ResultC Creation::createAccount(string account_id, string balance) {
+    result R;
+    work W(*C);
+    try {
+        W.exec("BEGIN;");
+        R = W.exec("SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID=" + W.quote(account_id));
+        if (R.size() != 0) {
+            W.exec("ROLLBACK;");
+            return {account_id, "", "error", "Account already exists"};
+        }
+        double curr_balance = stod(balance);
+        if (curr_balance >= 0) {
+            W.exec("INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) VALUES (" + W.quote(account_id) + ", " + W.quote(balance) + ")");
+            W.exec("COMMIT;");
+            return {account_id, "", "success", ""};
+        } else {
+            W.exec("ROLLBACK;");
+            return {account_id, "", "error", "Balance cannot be negative"};
+        }
+    } catch (const std::exception &e) {
+        W.exec("ROLLBACK;");
+        cerr << e.what() << endl;
+        return {account_id, "", "error", "Database error"};
+    }
+}
+
+ResultC Creation::createStock(string sym, string account_id, double amount) {
+
+    std::lock_guard<std::mutex> lck(mtx);
     ResultC res;
-    double curr_balance = stod(balance);
-    if (R.size() == 0 and curr_balance >= 0)
-    {
-        db.insert_account(account_id, curr_balance);
-        res = {account_id, "", "success", ""};
+    
+    try {
+        work W(*C);
+        
+ 
+        result account = W.exec("SELECT * FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id));
+        if (account.size() == 0) {
+            res = {account_id, sym, "error", "Account does not exist"};
+            W.commit(); 
+            return res;
+        }
+        
+  
+        result R = W.exec("SELECT * FROM SHARE WHERE SHAREID = " + W.quote(sym) + " AND ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
+        if (R.size() == 0) {
+    
+            W.exec("INSERT INTO SHARE (SHAREID, ACCOUNT_ID, NUM) VALUES (" + W.quote(sym) + ", " + W.quote(account_id) + ", " + W.quote(amount) + ")");
+        } else {
+     
+            double current_amount = R.begin()[3].as<double>(); 
+            double total = current_amount + amount;
+            W.exec("UPDATE SHARE SET NUM = " + W.quote(total) + " WHERE SHAREID = " + W.quote(sym) + " AND ACCOUNT_ID = " + W.quote(account_id));
+        }
+        
+
+        W.commit();
+        res = {account_id, sym, "success", ""};
+    } catch (const std::exception &e) {
+
+        cerr << "Exception: " << e.what() << std::endl;
+        res = {account_id, sym, "error", "Database operation failed"};
     }
-    else if (curr_balance < 0)
-    {
-        res = {account_id, "", "error", "Balance cannot be negative"};
-    }
-    else
-    {
-        res = {account_id, "", "error", "Account already exists"};
-    }
+
     return res;
 }
 
-ResultC Creation::createStock(string sym, string account_id, double amount)
-{
-    std::lock_guard<std::mutex> lck (mtx);
-    result account = db.inquire_account(account_id);
-    ResultC res;
-    if (account.size() == 0)
-    {
-        res = {account_id, sym, "error", "Account does not exist"};
-    }
-    else
-    {
-        result R = db.inquire_stock(sym, account_id);
-        if (R.size() == 0)
-        {
-            db.insert_stock(sym, account_id, amount);
-            res = {account_id, sym, "success", ""};
-        }
-        else
-        {
-            double total = amount + R.begin()[3].as<double>();
-            db.update_stock(sym, account_id, total);
-            res = {account_id, sym, "success", ""};
-        }
-    }
-    return res;
-}
+ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, string trans_id) {
+    cout << "Here is open order" << endl;
 
-ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, string trans_id)
-{
-    std::lock_guard<std::mutex> lck (mtx);
     ResultT res;
     vector<Transaction> trans_history;
     double shares = stod(amount);
@@ -63,125 +80,100 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     std::string timestamp = mkt.get_time();
     Transaction curr = {sym, account_id, shares, price, timestamp, ""};
     trans_history.push_back(curr);
-    if (shares < 0)
-    {
-        result R = db.inquire_stock(sym, account_id);
-        double curr_shares;
-        if (R.size() == 0)
-        {
-            curr_shares = 0;
+
+    try {
+    
+        if (shares < 0) { // 处理卖单
+            res = db.open_sell_order(account_id, sym, shares, price, trans_id);
+        } else if (shares > 0) { // 处理买单
+            res = db.open_buy_order(account_id, sym, shares, price, trans_id);
         }
-        else
-        {
-            curr_shares = R.begin()[3].as<double>();
-        }
-        if (curr_shares >= abs(shares))
-        {
-            db.insert_sell_order(sym, account_id, abs(shares), price, timestamp, trans_id);
-            db.update_stock(sym, account_id, curr_shares + shares);
-            db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
-            res = {account_id, "order", trans_id, sym, "success", "", trans_history};
-        }
-        else
-        {
-            res = {account_id, "order", trans_id, sym, "error", "Not enough shares", trans_history};
-        }
+    } catch (const std::exception& e) {
+        cerr << "Transaction failed: " << e.what() << endl;
+        // 这里可能需要根据异常类型决定是否回滚事务
+        res = {account_id, "order", trans_id, sym, "error", "Transaction failed", trans_history};
     }
-    else if (shares > 0)
-    {
-        result R = db.inquire_account(account_id);
-        double balance = R.begin()[1].as<double>();
-        double money = shares * price;
-        if (balance > money)
-        {
-            db.insert_buy_order(sym, account_id, shares, price, timestamp, trans_id);
-            db.update_account(account_id, balance - money);
-            db.insert_transaction(trans_id, timestamp, account_id, sym, shares, price, "open");
-            res = {account_id, "order", trans_id, sym, "success", "", trans_history};
-        }
-        else
-        {
-            res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
-        }
-    }
-    mkt.match_sell();
+    res.transaction = trans_history;
+    mkt.match_sell(); // 这个方法需要在事务外执行，并且也需要处理并发问题
     return res;
 }
 
-ResultT Transact::cancelOrder(string trans_id)
-{
-    std::lock_guard<std::mutex> lck (mtx);
-    result R = db.inquire_transaction(trans_id);
+ResultT Transact::cancelOrder(string trans_id) {
     ResultT res;
     vector<Transaction> trans_history;
     std::string timestamp = mkt.get_time();
-    if (R.size() != 0)
-    {
-        db.delete_buy_order(trans_id);
-        db.delete_sell_order(trans_id);
-        db.update_transaction(trans_id, timestamp, "canceled");
-        R = db.inquire_transaction(trans_id);
-        for (result::iterator i = R.begin(); i != R.end(); ++i)
-        {
-            string trans_id = i[0].as<string>();
-            string timestamp = i[1].as<string>();
-            string account_id = i[2].as<string>();
-            string stock_id = i[3].as<string>();
-            double num = i[4].as<double>();
-            double price = i[5].as<double>();
-            string status = i[6].as<string>();
-            if (status == "canceled")
-            {
-                if (num < 0)
-                {
-                    sentStock(account_id, stock_id, abs(num));
-                }
-                else
-                {
-                    sentMoney(account_id, num * price);
-                }
+
+    try {
+        work W(*C);  // Start a transaction
+
+        // Lock the transaction row for update to prevent concurrent modifications
+        result R = W.exec("SELECT * FROM TRANSACTION WHERE TRANSACTION_ID = " + W.quote(trans_id) + " FOR UPDATE");
+        
+        if (R.size() != 0) {
+            string status = R.begin()[6].as<string>();
+            if (status != "open") {
+                res = {"", "cancel", trans_id, "", "error", "Transaction is not open", trans_history};
+                W.commit();  // Commit to end the transaction
+                return res;
             }
-            Transaction curr_trans = {stock_id, account_id, num, price, timestamp, status};
+
+            // Cancel sell and buy orders within the same transaction to maintain consistency
+
+       
+            W.exec("DELETE FROM SELL_ORDER WHERE TRANSACTION_ID = '" + trans_id + "';");
+            W.exec("DELETE FROM BUY_ORDER WHERE TRANSACTION_ID = '" + trans_id + "';");
+            W.exec("UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp +
+                "' WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';");
+            
+    
+
+            // Push the canceled transaction into the history
+            Transaction curr_trans = {
+                R.begin()[3].as<string>(),   // stock_id
+                R.begin()[2].as<string>(),   // account_id
+                R.begin()[4].as<double>(),   // num
+                R.begin()[5].as<double>(),   // price
+                timestamp,                   // updated timestamp
+                "canceled"                   // new status
+            };
             trans_history.push_back(curr_trans);
+            
+            res = {"", "cancel", trans_id, "", "success", "", trans_history};
+        } else {
+            res = {"", "cancel", trans_id, "", "error", "Transaction does not exist", trans_history};
         }
-        res = {"", "cancel", trans_id, "", "success", "", trans_history};
+
+        W.commit();  // Commit the transaction
+    } catch (const std::exception &e) {
+        cerr << "Exception in cancelOrder: " << e.what() << endl;
+        res = {"", "cancel", trans_id, "", "error", "Database operation failed", trans_history};
     }
-    else
-    {
-        res = {"", "cancel", trans_id, "", "error", "Transaction does not exist", trans_history};
-    }
+
     return res;
 }
 
-ResultT Transact::queryOrder(string trans_id)
-{
-    std::lock_guard<std::mutex> lck (mtx);
-    result R = db.inquire_transaction(trans_id);
+ResultT Transact::queryOrder(string trans_id) {
     ResultT res;
     vector<Transaction> trans_history;
-    if (R.size() != 0)
-    {
-        for (result::iterator i = R.begin(); i != R.end(); ++i)
-        {
-            Transaction curr_trans = {i[3].as<string>(), i[2].as<string>(), i[4].as<double>(), i[5].as<double>(), i[1].as<string>(), i[6].as<string>()};
-            trans_history.push_back(curr_trans);
+
+    try {
+        nontransaction N(*C); 
+        result R = N.exec("SELECT * FROM TRANSACTION WHERE TRANSACTION_ID = " + N.quote(trans_id));
+
+        if (R.size() != 0) {
+            for (const auto &row : R) {
+                Transaction curr_trans = {row[3].as<string>(), row[2].as<string>(), row[4].as<double>(), row[5].as<double>(), row[1].as<string>(), row[6].as<string>()};
+                trans_history.push_back(curr_trans);
+            }
+            res = {"", "query", trans_id, "", "success", "", trans_history};
+        } else {
+            res = {"", "query", trans_id, "", "error", "Transaction does not exist", trans_history};
         }
-        res = {"", "query", trans_id, "", "success", "", trans_history};
+    } catch (const std::exception &e) {
+        cerr << "Exception in queryOrder: " << e.what() << endl;
+        res = {"", "query", trans_id, "", "error", "Database operation failed", trans_history};
     }
-    else
-    {
-        res = {"", "query", trans_id, "", "error", "Transaction does not exist", trans_history};
-    }
+
     return res;
 }
 
-bool Transact::checkAccount(string account_id)
-{
-    std::lock_guard<std::mutex> lck (mtx);
-    result R = db.inquire_account(account_id);
-    if (R.size() == 0)
-    {
-        return false;
-    }
-    return true;
-}

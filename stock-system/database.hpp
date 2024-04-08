@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
 #include <fstream>
+#include <chrono>
 #include "global_var.hpp"
 #include "myStruct.h"
 
@@ -15,6 +16,9 @@ class Database
 {
 public:
     connection *C = root_connection;
+
+
+
     void drop_table();
     void create_table();
     void init_database();
@@ -48,6 +52,16 @@ public:
 
     vector<Order> retrieve_sell_order();
     vector<Order> retrieve_buy_order();
+
+
+    ResultC create_account(string account_id, double balance);
+    ResultC create_stock(string stock_id, string account_id, double num);
+    ResultT query_order(string trans_id);
+    ResultT open_sell_order(string account_id, string sym, double amount, double limit, string trans_id);
+    ResultT open_buy_order(string account_id, string sym, double amount, double price, string trans_id);
+    ResultT cancel_order(string trans_id);
+
+    string get_time();
 };
 
 #endif // DATABASE_HPP
