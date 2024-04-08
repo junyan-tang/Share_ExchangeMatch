@@ -16,97 +16,72 @@
 #include <time.h>
 #include <unistd.h>
 
-
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT "12345"
-
-#define MAX_THREAD 2
 #define BUFF_SIZE 10240
+#define MAX_THREAD 2
 
+int createSocketAndConnect(const char* serverAddr, const char* serverPort) {
+    struct addrinfo hints, *res;
+    int serverSfd;
 
-void *handler(void *arg) {
-  char buffer[BUFF_SIZE];
-  int server_sfd;
-  int server_port_num;
-  int stat;
-  int len;
-  struct hostent *server_info;
-  struct addrinfo host_info;
-  struct addrinfo *host_info_list;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; 
+    hints.ai_socktype = SOCK_STREAM;
 
-  server_info = gethostbyname(SERVER_ADDR);
-  if (server_info == NULL) {
-    std::cerr << "host not found\n";
-    exit(1);
-  }
-  server_port_num = 12345; 
-
-  memset(&host_info, 0, sizeof(host_info));
-  host_info.ai_family = AF_UNSPEC;
-  host_info.ai_socktype = SOCK_STREAM;
-  stat = getaddrinfo(SERVER_ADDR, SERVER_PORT, &host_info, &host_info_list);
-
-  // create socket
-  server_sfd = socket(host_info_list->ai_family, host_info_list->ai_socktype,
-                      host_info_list->ai_protocol);
-  int yes = 1;
-  stat = setsockopt(server_sfd, SOL_SOCKET, SO_REUSEADDR, (char *)&yes,
-                    sizeof(yes));
-  if (server_sfd < 0) {
-    perror("socket");
-    exit(server_sfd);
-  }
-  // connect to the server
-  stat =
-      connect(server_sfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
-  if (stat < 0) {
-    perror("server connect");
-    exit(stat);
-  }
-
-  std::cout << "begin to send request\n" << std::endl;
-
-  // XML request to be sent
-  char *temp = (char *)arg;
-  std::string file(temp);
-  std::ifstream fs(file);
-  std::string fcontent;
-  std::stringstream ss;
-  std::string req;
-
-  if (!fs.fail()) {
-    ss << fs.rdbuf();
-    try {
-      req = ss.str();
-    } catch (std::exception &e) {
-      std::cerr << "here... " << e.what() << std::endl;
+    if (getaddrinfo(serverAddr, serverPort, &hints, &res) != 0) {
+        perror("getaddrinfo");
+        exit(EXIT_FAILURE);
     }
-  }
 
-  long long xml_len = req.length();
-  std::string prefix = std::to_string(xml_len);
-  prefix += "\n";
-  req = prefix + req;
-  len = send(server_sfd, req.c_str(), req.length(), 0);
-  std::cout << "send request: " << req << std::endl;
-  stat = recv(server_sfd, buffer, BUFF_SIZE, 0);
+    serverSfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (serverSfd < 0) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
 
+    if (connect(serverSfd, res->ai_addr, res->ai_addrlen) < 0) {
+        perror("connect");
+        exit(EXIT_FAILURE);
+    }
 
-  std::cout << "receive: " << buffer << std::endl;
+    freeaddrinfo(res); 
+    return serverSfd;
 }
 
-int main(int argc, char **argv) {
-  int threads[MAX_THREAD];
-  pthread_attr_t thread_attr[MAX_THREAD];
-  pthread_t thread_ids[MAX_THREAD];
+void sendXmlRequest(int sockfd, const std::string& filePath) {
+    std::ifstream fs(filePath);
+    std::stringstream buffer;
+    buffer << fs.rdbuf(); 
+    std::string req = buffer.str();
 
-  for (int i = 0; i < MAX_THREAD; ++i) {
-    threads[i] = pthread_create(&thread_ids[i], NULL, handler, argv[1]);
-    usleep(3000);
-  }
-  for (int i = 0; i < MAX_THREAD; ++i) {
-    pthread_join(thread_ids[i], NULL);
-  }
-  return 0;
+    std::string prefixedReq = std::to_string(req.length()) + "\n" + req; 
+    send(sockfd, prefixedReq.c_str(), prefixedReq.length(), 0); 
 }
 
+std::string receiveResponse(int sockfd) {
+    char buffer[BUFF_SIZE];
+    memset(buffer, 0, sizeof(buffer)); 
+    recv(sockfd, buffer, sizeof(buffer), 0); 
+    return std::string(buffer);
+}
+
+void* handler(void* arg) {
+    char* filePath = static_cast<char*>(arg);
+    int sockfd = createSocketAndConnect(SERVER_ADDR, SERVER_PORT);
+    sendXmlRequest(sockfd, filePath);
+    std::cout << "Response: " << receiveResponse(sockfd) << std::endl;
+    close(sockfd);
+}
+
+int main(int argc, char** argv) {
+    pthread_t threads[MAX_THREAD];
+    for (int i = 0; i < MAX_THREAD; ++i) {
+        pthread_create(&threads[i], NULL, handler, argv[1]);
+        usleep(3000);
+    }
+    for (int i = 0; i < MAX_THREAD; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+    return 0;
+}

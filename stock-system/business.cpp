@@ -71,7 +71,6 @@ ResultC Creation::createStock(string sym, string account_id, double amount) {
 }
 
 ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, string trans_id) {
-    cout << "Here is open order" << endl;
 
     ResultT res;
     vector<Transaction> trans_history;
@@ -82,48 +81,47 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
     trans_history.push_back(curr);
 
     try {
-        work W(*C); // 开始一个新事务
+        work W(*C); 
     
-        if (shares < 0) { // 处理卖单
+        if (shares < 0) {
             result R = W.exec("SELECT * FROM SHARE WHERE SHAREID = " + W.quote(sym) + " AND ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
             double curr_shares = R.size() == 0 ? 0 : R.begin()[2].as<double>();
 
             if (curr_shares >= abs(shares)) {
 
                 db.insert_sell_order(W, sym, account_id, abs(shares), price, timestamp, trans_id);
-                db.update_stock(W, sym, account_id, curr_shares + shares); // 这里应该是减去卖出的股票数量
+                db.update_stock(W, sym, account_id, curr_shares + shares); 
                 db.insert_transaction(W, trans_id, timestamp, account_id, sym, shares, price, "open");
                 res = {account_id, "order", trans_id, sym, "success", "", trans_history};
             } else {
-                W.abort(); // 没有足够的股票，取消事务
+                W.abort(); 
                 res = {account_id, "order", trans_id, sym, "error", "Not enough shares", trans_history};
                 return res;
             }
-        } else if (shares > 0) { // 处理买单
+        } else if (shares > 0) { 
             result R = W.exec("SELECT * FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
             double balance = R.begin()[1].as<double>();
             double money_needed = shares * price;
-            cout << "money_needed: " << money_needed << endl;
+
             if (balance >= money_needed) {
                 db.insert_buy_order(W, sym, account_id, shares, price, timestamp, trans_id);
                 db.update_account(W, account_id, balance - money_needed);
                 db.insert_transaction(W, trans_id, timestamp, account_id, sym, shares, price, "open");
                 res = {account_id, "order", trans_id, sym, "success", "", trans_history};
             } else {
-                W.abort(); // 余额不足，取消事务
+                W.abort(); 
                 res = {account_id, "order", trans_id, sym, "error", "Not enough balance", trans_history};
                 return res;
             }
         }
 
-        W.commit(); // 提交事务
+        W.commit();
     } catch (const std::exception& e) {
-        cerr << "Transaction failed: " << e.what() << endl;
-        // 这里可能需要根据异常类型决定是否回滚事务
+
+
         res = {account_id, "order", trans_id, sym, "error", "Transaction failed", trans_history};
     }
-    cout << "start match sell now" << endl;
-    mkt.match_sell(); // 这个方法需要在事务外执行，并且也需要处理并发问题
+    mkt.match_sell(); 
     return res;
 }
 
@@ -133,20 +131,20 @@ ResultT Transact::cancelOrder(string trans_id) {
     std::string timestamp = mkt.get_time();
 
     try {
-        work W(*C);  // Start a transaction
+        work W(*C);  
 
-        // Lock the transaction row for update to prevent concurrent modifications
+
         result R = W.exec("SELECT * FROM TRANSACTION WHERE TRANSACTION_ID = " + W.quote(trans_id) + " FOR UPDATE");
         
         if (R.size() != 0) {
             string status = R.begin()[6].as<string>();
             if (status != "open") {
                 res = {"", "cancel", trans_id, "", "error", "Transaction is not open", trans_history};
-                W.commit();  // Commit to end the transaction
+                W.commit(); 
                 return res;
             }
 
-            // Cancel sell and buy orders within the same transaction to maintain consistency
+    
 
        
             W.exec("DELETE FROM SELL_ORDER WHERE TRANSACTION_ID = '" + trans_id + "';");
@@ -156,7 +154,7 @@ ResultT Transact::cancelOrder(string trans_id) {
             
     
 
-            // Push the canceled transaction into the history
+       
             Transaction curr_trans = {
                 R.begin()[3].as<string>(),   // stock_id
                 R.begin()[2].as<string>(),   // account_id
@@ -172,7 +170,7 @@ ResultT Transact::cancelOrder(string trans_id) {
             res = {"", "cancel", trans_id, "", "error", "Transaction does not exist", trans_history};
         }
 
-        W.commit();  // Commit the transaction
+        W.commit();  
     } catch (const std::exception &e) {
         cerr << "Exception in cancelOrder: " << e.what() << endl;
         res = {"", "cancel", trans_id, "", "error", "Database operation failed", trans_history};

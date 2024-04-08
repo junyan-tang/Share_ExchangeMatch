@@ -25,7 +25,6 @@ string XMLParser::parseRequest(string xml)
     {
         return "invalid request";
     }
-    cout << "parseRequest finish" << endl;
     return response;
 }
 
@@ -110,7 +109,7 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node)
                 
                 ResultT current_result = transactor.openOrder(account_id, sym, amount, limit, to_string(transaction_id));
                 results.push_back(current_result);
-                cout << "finish open order" << endl;
+             
             }
             else if (string(trans_type.name()) == "cancel")
             {

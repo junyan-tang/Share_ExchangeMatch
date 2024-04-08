@@ -72,7 +72,7 @@ string Server::recv_request(int socket_fd)
   }
 
   size_t expectedLength = stoull(lengthStr);
-  cout << "Expected length: " << expectedLength << endl;
+
 
   string data;
   size_t totalBytesReceived = 0;
@@ -99,7 +99,6 @@ void Server::run()
 
   while (true)
   {
-    cout << "watting for connection" << endl;
     sin_size = sizeof(their_addr);
     int new_fd = accept(server_sockfd, (struct sockaddr *)&their_addr, &sin_size);
 
@@ -126,9 +125,7 @@ void Server::process(int new_fd) {
   
         string data = recv_request(new_fd);
       
-        cout << "receive successful" << endl;
         if (data.empty() || data == "receive length failed" || data == "Error: recv failed in loop") {
-            cout << "Error or connection closed by client" << endl;
             break; 
         }
 
@@ -138,13 +135,12 @@ void Server::process(int new_fd) {
 
         
         send(new_fd, response.c_str(), response.length(), 0);
-      cout << "response: " << response << endl;
-        cout << "send over" << endl;
-      }catch(exception &e){
-        cout << "error detected" << endl;
-        cout << e.what() << endl;
-        break;
-      }
+        cout << "Response: " << response << endl;
+        }catch(exception &e){
+          cout << "error detected" << endl;
+          cout << e.what() << endl;
+          break;
+        }
 
     }
     close(new_fd);

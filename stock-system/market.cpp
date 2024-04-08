@@ -142,27 +142,27 @@ void market::sentStock(work & W, string account_id, string stock_id, double amou
     try {
 
 
-        // Lock the stock row for update to prevent concurrent modifications
+      
         result res = W.exec("SELECT NUM FROM SHARE WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
 
         double new_amount;
         if (res.size() > 0) {
-            // If the stock exists, update the existing amount
+
             double curr_shares = res[0][0].as<double>();
             new_amount = curr_shares + amount;
         } else {
-            // If the stock does not exist, we might want to create it with the new amount
+         
             new_amount = amount;
-            // Depending on your business logic, you might want to handle this differently
+
         }
 
-        // Update the stock amount
+
         W.exec("UPDATE SHARE SET NUM = " + W.quote(new_amount) + " WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id));
 
 
     } catch (const std::exception &e) {
         cerr << "Exception in sentStock: " << e.what() << endl;
-        // Handle the exception, rollback, or propagate the error as needed
+
     }
 }
 
@@ -170,24 +170,22 @@ void market::sentMoney(work & W, string account_id, double amount) {
     try {
 
 
-        // Lock the account row for update to prevent concurrent modifications
         result res = W.exec("SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
 
         if (res.size() > 0) {
-            // If the account exists, update the balance
+
             double balance = res[0][0].as<double>();
             double new_balance = balance + amount;
 
-            // Update the account balance
+
             W.exec("UPDATE ACCOUNT SET BALANCE = " + W.quote(new_balance) + " WHERE ACCOUNT_ID = " + W.quote(account_id));
         } else {
-            // Handle the situation where the account does not exist
-            // Depending on your business logic, you might want to create a new account or handle it as an error
+
         }
 
     } catch (const std::exception &e) {
         cerr << "Exception in sentMoney: " << e.what() << endl;
-        // Handle the exception, rollback, or propagate the error as needed
+
     }
 }
 

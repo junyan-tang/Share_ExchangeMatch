@@ -28,44 +28,27 @@ void send_data(int sockfd, const string& data) {
 }
 
 string recv_data(int sockfd) {
-    const int bufferSize = 1024;
-    char buffer[bufferSize];
-    string data;
-    ssize_t bytesReceived;
-
-
-    bytesReceived = recv(sockfd, buffer, bufferSize, 0);
-    if (bytesReceived <= 0) {
+    char buffer[8192];
+    memset(buffer, 0, sizeof(buffer)); 
+    
+    ssize_t bytesReceived = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+    if (bytesReceived == -1) {
         cerr << "Error: recv failed" << endl;
-        return "";
+        return ""; // Error handling
+    } else if (bytesReceived == 0) {
+        cerr << "Connection closed" << endl;
+        return ""; 
     }
-    data.append(buffer, bytesReceived);
-
-
-    size_t pos = data.find("\n");
-    if (pos != string::npos) {
-        size_t expectedLength = stoull(data.substr(0, pos));
-        data = data.substr(pos + 1); 
-
-
-    while (data.size() < expectedLength) {
-        size_t bytesToRead = std::min(static_cast<size_t>(bufferSize), expectedLength - data.size());
-        bytesReceived = recv(sockfd, buffer, bytesToRead, 0);
-            if (bytesReceived <= 0) {
-                cerr << "Error: recv failed during message reception" << endl;
-                return "";
-            }
-            data.append(buffer, bytesReceived);
-        }
-    }
-
-    return data;
+    
+    buffer[bytesReceived] = '\0';
+    string re = string(buffer);
+    cout << "this is response: " << re << endl;
+    return re;
 }
 
 
-
 void test(int sockfd){
-        string data;
+    string data;
 
     data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<create>\n"
@@ -87,19 +70,12 @@ void test(int sockfd){
             "   </symbol>\n"
             "</create>\n";
 
-    data = resize_data(data);
-    send_data(sockfd, data);
-    cout << data << "\n======" << endl;
-    
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<transactions id=\"123456\">\n"
-            "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
-            "<query id=\"78910\"/>\n"
-            "<cancel id=\"78910\"/>\n"
-            "</transactions>\n";
-    data1 = resize_data(data1);
-    send_data(sockfd, data1);
-    cout << data1 << "\n======" << endl;
+        "<transactions id=\"123456\">\n"
+        "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
+        "<query id=\"78910\"/>\n"
+        "<cancel id=\"78910\"/>\n"
+        "</transactions>\n";
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"223456\">\n"
@@ -107,10 +83,6 @@ void test(int sockfd){
         "<query id=\"1\"/>\n"
         "</transactions>\n";
 
-    data2 = resize_data(data2);
-
-    send_data(sockfd, data2);
-    cout << data2 << "\n======" << endl;
 
     string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"323456\">\n"
@@ -118,37 +90,24 @@ void test(int sockfd){
         "<query id=\"1\"/>\n"
         "</transactions>\n";
 
-    data3 = resize_data(data3);
 
-    send_data(sockfd, data3);
-    cout << data3 << "\n======" << endl;
 
     string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"423456\">\n"
         "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
         "</transactions>\n";
-    data4 = resize_data(data4);
-
-    send_data(sockfd, data4);
-    cout << data4 << "\n======" << endl;
 
     string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"523456\">\n"
         "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
-        "</transactions>\n";
-    data5 = resize_data(data5);
+        "</transactions>\n";    
 
-    send_data(sockfd, data5);
-    cout << data5 << "\n======" << endl;
 
     string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"623456\">\n"
         "<order sym=\"SPY\" amount=\"400\" limit=\"125\"/>\n"
-        "</transactions>\n";
-    data6 = resize_data(data6);
+        "</transactions>\n";       
 
-    send_data(sockfd, data6);
-    cout << data6 << "\n======" << endl;
 
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<transactions id=\"323456\">\n"
@@ -160,33 +119,56 @@ void test(int sockfd){
                 "   <query id=\"6\"/>\n"
                 "</transactions>\n";
 
-    data7 = resize_data(data7);
-
-    send_data(sockfd, data7);
-    cout << data7 << "\n======" << endl;
 
     string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    "<transactions id=\"723456\">\n"
-                    "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
-                    "   <query id=\"1\"/>\n"
-                    "   <query id=\"2\"/>\n"
-                    "   <query id=\"3\"/>\n"
-                    "   <query id=\"4\"/>\n"
-                    "   <query id=\"5\"/>\n"
-                    "   <query id=\"6\"/>\n"
-                    "</transactions>\n";
+                "<transactions id=\"723456\">\n"
+                "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
+                "   <query id=\"1\"/>\n"
+                "   <query id=\"2\"/>\n"
+                "   <query id=\"3\"/>\n"
+                "   <query id=\"4\"/>\n"
+                "   <query id=\"5\"/>\n"
+                "   <query id=\"6\"/>\n"
+                "</transactions>\n"; 
 
+    string response;
+
+    data = resize_data(data);
+    
+    
+    data1 = resize_data(data1);
+
+    data2 = resize_data(data2);
+    data3 = resize_data(data3);
+    data4 = resize_data(data4);
+    data5 = resize_data(data5);
+    data6 = resize_data(data6);
+    data7 = resize_data(data7);
     data8 = resize_data(data8);
 
+    send_data(sockfd, data);
+    recv_data(sockfd);
+    send_data(sockfd, data1);
+    recv_data(sockfd);
+    send_data(sockfd, data2);
+    recv_data(sockfd);
+    send_data(sockfd, data3);
+    recv_data(sockfd);
+    send_data(sockfd, data4);
+    recv_data(sockfd);
+    send_data(sockfd, data5);
+    recv_data(sockfd);
+    send_data(sockfd, data6);
+    recv_data(sockfd);
+    send_data(sockfd, data7);
+    recv_data(sockfd);
     send_data(sockfd, data8);
-    cout << data8 << "\n======" << endl;
+    recv_data(sockfd);
 
-    while(true){
-        
-    }
 
 
 }
+
 void test1(int sockfd){
 
 
@@ -199,13 +181,6 @@ void test1(int sockfd){
             "<query id=\"78910\"/>\n"
             "<cancel id=\"78910\"/>\n"
             "</transactions>\n";
-    data1 = resize_data(data1);
-
-    cout << data1 << "\n======" << endl;
-
-    send_data(sockfd, data1);
-
-
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"223456\">\n"
@@ -213,75 +188,28 @@ void test1(int sockfd){
         "<query id=\"1\"/>\n"
         "</transactions>\n";
 
-    data2 = resize_data(data2);
-
-
-    cout << data2 << "\n======" << endl;
-    send_data(sockfd, data2);
-
-
     string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"323456\">\n"
         "<order sym=\"SPY\" amount=\"400\" limit=\"125\"/>\n"
         "<cancel id=\"1\"/>\n"
         "</transactions>\n";
 
-    try
-    {
-        data3 = resize_data(data3);
-        cout << data3 << "\n======" << endl;
-        send_data(sockfd, data3);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-
-
-
-
-
     string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"423456\">\n"
         "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
         "</transactions>\n";
-    data4 = resize_data(data4);
-    cout << data4 << "\n======" << endl;
-    send_data(sockfd, data4);
-
-
-
     string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"523456\">\n"
         "<order sym=\"SPY\" amount=\"-100\" limit=\"130\"/>\n"
         "</transactions>\n";
-    data5 = resize_data(data5);
-    cout << data5 << "\n======" << endl;
-    send_data(sockfd, data5);
-
-        sleep(1);
-
     string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"623456\">\n"
         "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
         "</transactions>\n";
-    data6 = resize_data(data6);
-    cout << data6 << "\n======" << endl;
-    send_data(sockfd, data6);
-
-        sleep(1);
-
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<transactions id=\"723456\">\n"
                 "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
                 "</transactions>\n";
-
-    data7 = resize_data(data7);
-    cout << data7 << "\n======" << endl;
-    send_data(sockfd, data7);
-
-
 
     string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<transactions id=\"723456\">\n"
@@ -294,9 +222,33 @@ void test1(int sockfd){
                 "   <query id=\"7\"/>\n"
                 "</transactions>\n";
 
+    data1 = resize_data(data1);
+    data2 = resize_data(data2);
+    data3 = resize_data(data3);
+    data4 = resize_data(data4);
+    data5 = resize_data(data5);
+    data6 = resize_data(data6);
+    data7 = resize_data(data7);
     data8 = resize_data(data8);
-    cout << data8 << "\n======" << endl;
+
+
+
+    send_data(sockfd, data1);
+    recv_data(sockfd);
+    send_data(sockfd, data2);
+    recv_data(sockfd);
+    send_data(sockfd, data3);
+    recv_data(sockfd);
+    send_data(sockfd, data4);
+    recv_data(sockfd);
+    send_data(sockfd, data5);
+    recv_data(sockfd);
+    send_data(sockfd, data6);
+    recv_data(sockfd);
+    send_data(sockfd, data7);
+    recv_data(sockfd);
     send_data(sockfd, data8);
+    recv_data(sockfd);
 
 
 
@@ -307,6 +259,7 @@ void test2(int sockfd){
     string data = "<create><account id=\"0\" balance=\"50000\"/><account id=\"2\" balance=\"-100000\"/><symbol sym=\"TESLA\"><account id=\"1\">200</account></symbol></create>";
     data = resize_data(data);
     send_data(sockfd, data);
+    recv_data(sockfd);
 
 
 }
@@ -324,9 +277,13 @@ void test3(int sockfd){
     data3 = resize_data(data3);
 
     send_data(sockfd, data);
+    recv_data(sockfd);
     send_data(sockfd, data1);
+    recv_data(sockfd);
     send_data(sockfd, data2);
+    recv_data(sockfd);
     send_data(sockfd, data3);
+    recv_data(sockfd);
 }
 
 void test4(int sockfd){
@@ -342,9 +299,13 @@ void test4(int sockfd){
 
 
     send_data(sockfd, data);
+    recv_data(sockfd);
     send_data(sockfd, data1);
+    recv_data(sockfd);
     send_data(sockfd, data2);
+    recv_data(sockfd);
     send_data(sockfd, data3);
+    recv_data(sockfd);
 }
 
 void test5(int sockfd) {
@@ -367,13 +328,21 @@ void test5(int sockfd) {
     data7 = resize_data(data7);
 
     send_data(sockfd, data);
+    recv_data(sockfd);
     send_data(sockfd, data1);
+    recv_data(sockfd);
     send_data(sockfd, data2);
+    recv_data(sockfd);
     send_data(sockfd, data3);
+    recv_data(sockfd);
     send_data(sockfd, data4);
+    recv_data(sockfd);
     send_data(sockfd, data5);
+    recv_data(sockfd);
     send_data(sockfd, data6);
+    recv_data(sockfd);
     send_data(sockfd, data7);
+    recv_data(sockfd);
 }
 
 void test6(int sockfd) {
@@ -389,9 +358,13 @@ void test6(int sockfd) {
     data3 = resize_data(data3);
 
     send_data(sockfd, data);
+    recv_data(sockfd);
     send_data(sockfd, data1);
+    recv_data(sockfd);
     send_data(sockfd, data2);
+    recv_data(sockfd);
     send_data(sockfd, data3);
+    recv_data(sockfd);
 
 
 
