@@ -38,22 +38,13 @@ void test1(int sockfd){
     cout << data << "\n======" << endl;
     sleep(1);
     
-    string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<transactions id=\"123456\">\n"
-            "<order sym=\"SPY\" amount=\"200\" limit=\"127\"/>\n"
-            "<query id=\"78910\"/>\n"
-            "<cancel id=\"78910\"/>\n"
-            "</transactions>\n";
+    string data1 = 
     data1 = resize_data(data1);
     send_data(sockfd, data1);
     cout << data1 << "\n======" << endl;
         sleep(1);
 
-    string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<transactions id=\"223456\">\n"
-        "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
-        "<query id=\"1\"/>\n"
-        "</transactions>\n";
+    string data2 = 
 
     data2 = resize_data(data2);
 
@@ -61,11 +52,7 @@ void test1(int sockfd){
     cout << data2 << "\n======" << endl;
         sleep(1);
 
-    string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<transactions id=\"323456\">\n"
-        "<order sym=\"SPY\" amount=\"400\" limit=\"125\"/>\n"
-        "<cancel id=\"1\"/>\n"
-        "</transactions>\n";
+    string data3 = 
 
     data3 = resize_data(data3);
 
@@ -73,40 +60,28 @@ void test1(int sockfd){
     cout << data3 << "\n======" << endl;
         sleep(1);
 
-    string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<transactions id=\"423456\">\n"
-        "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
-        "</transactions>\n";
+    string data4 = 
     data4 = resize_data(data4);
 
     send_data(sockfd, data4);
     cout << data4 << "\n======" << endl;
         sleep(1);
 
-    string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<transactions id=\"523456\">\n"
-        "<order sym=\"SPY\" amount=\"-100\" limit=\"130\"/>\n"
-        "</transactions>\n";
+    string data5 = 
     data5 = resize_data(data5);
 
     send_data(sockfd, data5);
     cout << data5 << "\n======" << endl;
         sleep(1);
 
-    string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<transactions id=\"623456\">\n"
-        "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
-        "</transactions>\n";
+    string data6 = 
     data6 = resize_data(data6);
 
     send_data(sockfd, data6);
     cout << data6 << "\n======" << endl;
         sleep(1);
 
-    string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                "<transactions id=\"723456\">\n"
-                "   <order sym=\"SPY\" amount=\"-400\" limit=\"124\"/>\n"
-                "</transactions>\n";
+    string data7 = 
 
     data7 = resize_data(data7);
 
@@ -114,16 +89,7 @@ void test1(int sockfd){
     cout << data7 << "\n======" << endl;
     sleep(1);
 
-    string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                "<transactions id=\"723456\">\n"
-                "   <query id=\"1\"/>\n"
-                "   <query id=\"2\"/>\n"
-                "   <query id=\"3\"/>\n"
-                "   <query id=\"4\"/>\n"
-                "   <query id=\"5\"/>\n"
-                "   <query id=\"6\"/>\n"
-                "   <query id=\"7\"/>\n"
-                "</transactions>\n";
+    string data8 = 
 
     data8 = resize_data(data8);
 

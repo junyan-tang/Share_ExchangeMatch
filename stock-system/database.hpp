@@ -7,6 +7,7 @@
 #include <fstream>
 #include "global_var.hpp"
 #include "myStruct.h"
+#include <chrono>
 
 using namespace std;
 using namespace pqxx;
@@ -19,10 +20,12 @@ public:
     void create_table();
     void init_database();
 
-    void insert_account(string account_id, double balance);
-    void insert_stock(string stock_id, string account_id, double num);
-    void insert_sell_order(string stock_id, string account_id, double num, double price, string timestamp, string trans_id);
-    void insert_buy_order(string stock_id, string account_id, double num, double price, string timestamp, string trans_id);
+    ResultC create_account(string account_id, double balance);
+    ResultC create_stock(string stock_id, string account_id, double num);
+    ResultT query_order(string trans_id);
+    ResultT open_sell_order(string account_id, string sym, double amount, double limit, string trans_id);
+    ResultT open_buy_order(string account_id, string sym, double amount, double price, string trans_id);
+    ResultT cancel_order(string trans_id);
     void insert_transaction(string trans_id, string timestamp, string account_id, string stock_id, double num, double price, string status);
 
     void update_account(string account_id, double balance);
@@ -45,6 +48,8 @@ public:
     result inquire_account(string account_id);
     result inquire_stock(string stock_id, string account_id);
     result inquire_transaction(string trans_id);
+
+    string get_time();
 
     vector<Order> retrieve_sell_order();
     vector<Order> retrieve_buy_order();
