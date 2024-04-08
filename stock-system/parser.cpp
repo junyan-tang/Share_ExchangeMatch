@@ -81,7 +81,10 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node)
     if (node.attribute("id"))
     {
         string account_id = node.attribute("id").value();
-        if (!transactor.checkAccount(account_id))
+        work W(*C);
+        result R = W.exec("SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id));
+        W.commit();
+        if (R.size() == 0)
         {
             pugi::xml_node curr_node = node.first_child();
             while (curr_node)

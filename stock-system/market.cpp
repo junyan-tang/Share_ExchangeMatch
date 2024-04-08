@@ -181,8 +181,6 @@ void market::sentMoney(string account_id, double amount) {
     }
 }
 
-
-
 string market::get_time()
 {
     auto now = std::chrono::system_clock::now();
