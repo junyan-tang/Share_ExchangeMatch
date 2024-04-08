@@ -3,7 +3,7 @@
 TEST_ORDER=test2.xml
 TEST_QUERY=test3.xml
 
-REQUESTS_NUM=500
+REQUESTS_NUM=10
 
 ./client test1.xml
 

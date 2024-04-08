@@ -123,8 +123,9 @@ void Server::run()
 void Server::process(int new_fd) {
     while (true) {
       try{
-        cout << "receive data " << endl;
+  
         string data = recv_request(new_fd);
+      
         cout << "receive successful" << endl;
         if (data.empty() || data == "receive length failed" || data == "Error: recv failed in loop") {
             cout << "Error or connection closed by client" << endl;
@@ -135,9 +136,9 @@ void Server::process(int new_fd) {
         XMLParser parser;
         string response = parser.parseRequest(data);
 
-        cout << "response: " << response << endl;
+        
         send(new_fd, response.c_str(), response.length(), 0);
-
+      cout << "response: " << response << endl;
         cout << "send over" << endl;
       }catch(exception &e){
         cout << "error detected" << endl;
