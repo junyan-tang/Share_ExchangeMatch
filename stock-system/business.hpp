@@ -14,6 +14,7 @@ class Transact
 private:
     Database db;
     market mkt = market(db);
+    connection* C = root_connection;
 
 public:
     ResultT openOrder(string account_id, string stock_id, string amount, string limit, string trans_id);
@@ -34,6 +35,7 @@ class Creation
 {
 private:
     Database db;
+    connection* C = root_connection;
 
 public:
     ResultC createAccount(string account_id, string balance);

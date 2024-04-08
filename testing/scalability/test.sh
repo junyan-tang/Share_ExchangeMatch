@@ -2,8 +2,9 @@
 
 TEST_ORDER=test2.xml
 TEST_QUERY=test3.xml
+TEST_QUERY2=test4.xml
 
-REQUESTS_NUM=2
+REQUESTS_NUM=10
 
 ./client test1.xml
 
@@ -11,7 +12,9 @@ for ((i = 0; i < $REQUESTS_NUM; ++i))
 do
     echo "Request $i:"
     ./client $TEST_ORDER &  
-    ./client $TEST_QUERY &  
+    ./client $TEST_QUERY & 
+     
+
 done
 
 wait 

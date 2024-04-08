@@ -8,6 +8,8 @@ private:
     map<string, vector<Order>> sell_orders;
     map<string, vector<Order>> buy_orders;
     Database db;
+    connection * C;
+    
 public:
     market(Database db): db(db){};
     ~market(){};

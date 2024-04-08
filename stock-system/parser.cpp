@@ -18,12 +18,14 @@ string XMLParser::parseRequest(string xml)
     else if (doc.child("transactions"))
     {
         vector<ResultT> transaction_result = processTransaction(doc.child("transactions"));
+
         response = responseForTransaction(transaction_result);
     }
     else
     {
         return "invalid request";
     }
+    cout << "parseRequest finish" << endl;
     return response;
 }
 
@@ -105,8 +107,10 @@ vector<ResultT> XMLParser::processTransaction(const pugi::xml_node &node)
                 string sym = trans_type.attribute("sym").value();
                 string amount = trans_type.attribute("amount").value();
                 string limit = trans_type.attribute("limit").value();
+                
                 ResultT current_result = transactor.openOrder(account_id, sym, amount, limit, to_string(transaction_id));
                 results.push_back(current_result);
+                cout << "finish open order" << endl;
             }
             else if (string(trans_type.name()) == "cancel")
             {

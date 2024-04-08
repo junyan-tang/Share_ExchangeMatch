@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < MAX_THREAD; ++i) {
     threads[i] = pthread_create(&thread_ids[i], NULL, handler, argv[1]);
-    usleep(1000);
+    usleep(3000);
   }
   for (int i = 0; i < MAX_THREAD; ++i) {
     pthread_join(thread_ids[i], NULL);

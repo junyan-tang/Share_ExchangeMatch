@@ -3,7 +3,7 @@
 
 void Database::drop_table()
 {
-
+    
     work W(*C);
     W.exec("DROP TABLE IF EXISTS TRANSACTION CASCADE;");
     W.exec("DROP TABLE IF EXISTS BUY_ORDER CASCADE;");

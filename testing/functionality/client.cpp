@@ -29,14 +29,9 @@ void send_data(int sockfd, const string& data) {
 
 void test1(int sockfd){
 
-    string data;
 
-    
+ 
 
-    data = resize_data(data);
-    send_data(sockfd, data);
-    cout << data << "\n======" << endl;
-    sleep(1);
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<transactions id=\"123456\">\n"
@@ -45,9 +40,12 @@ void test1(int sockfd){
             "<cancel id=\"78910\"/>\n"
             "</transactions>\n";
     data1 = resize_data(data1);
-    send_data(sockfd, data1);
+
     cout << data1 << "\n======" << endl;
-        sleep(1);
+
+    send_data(sockfd, data1);
+
+
 
     string data2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"223456\">\n"
@@ -57,9 +55,10 @@ void test1(int sockfd){
 
     data2 = resize_data(data2);
 
-    send_data(sockfd, data2);
+
     cout << data2 << "\n======" << endl;
-        sleep(1);
+    send_data(sockfd, data2);
+
 
     string data3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"323456\">\n"
@@ -67,30 +66,40 @@ void test1(int sockfd){
         "<cancel id=\"1\"/>\n"
         "</transactions>\n";
 
-    data3 = resize_data(data3);
+    try
+    {
+        data3 = resize_data(data3);
+        cout << data3 << "\n======" << endl;
+        send_data(sockfd, data3);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 
-    send_data(sockfd, data3);
-    cout << data3 << "\n======" << endl;
-        sleep(1);
+
+
+
 
     string data4 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"423456\">\n"
         "<order sym=\"SPY\" amount=\"-200\" limit=\"140\"/>\n"
         "</transactions>\n";
     data4 = resize_data(data4);
-
-    send_data(sockfd, data4);
     cout << data4 << "\n======" << endl;
-        sleep(1);
+    send_data(sockfd, data4);
+
+
 
     string data5 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<transactions id=\"523456\">\n"
         "<order sym=\"SPY\" amount=\"-100\" limit=\"130\"/>\n"
         "</transactions>\n";
     data5 = resize_data(data5);
-
-    send_data(sockfd, data5);
     cout << data5 << "\n======" << endl;
+    send_data(sockfd, data5);
+
         sleep(1);
 
     string data6 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -98,9 +107,9 @@ void test1(int sockfd){
         "<order sym=\"SPY\" amount=\"-500\" limit=\"128\"/>\n"
         "</transactions>\n";
     data6 = resize_data(data6);
-
-    send_data(sockfd, data6);
     cout << data6 << "\n======" << endl;
+    send_data(sockfd, data6);
+
         sleep(1);
 
     string data7 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -109,10 +118,10 @@ void test1(int sockfd){
                 "</transactions>\n";
 
     data7 = resize_data(data7);
-
-    send_data(sockfd, data7);
     cout << data7 << "\n======" << endl;
-    sleep(1);
+    send_data(sockfd, data7);
+
+
 
     string data8 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<transactions id=\"723456\">\n"
@@ -126,11 +135,11 @@ void test1(int sockfd){
                 "</transactions>\n";
 
     data8 = resize_data(data8);
-
-    send_data(sockfd, data8);
     cout << data8 << "\n======" << endl;
+    send_data(sockfd, data8);
 
-    sleep(1);
+
+
 }
 
 
@@ -249,7 +258,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    test5(sockfd);
+    test3(sockfd);
 
     close(sockfd);
     freeaddrinfo(res);
