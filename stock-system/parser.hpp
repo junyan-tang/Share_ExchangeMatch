@@ -7,17 +7,19 @@
 #include "parser.hpp"
 
 using namespace std;
-class XMLParser {
+class XMLParser
+{
 public:
     Creation creator;
     Transact transactor;
-    connection * C = root_connection;
+    connection *C = root_connection;
 
     string parseRequest(string xml);
     vector<ResultC> processCreate(const pugi::xml_node &node);
     vector<ResultT> processTransaction(const pugi::xml_node &node);
     string responseForCreate(vector<ResultC> results);
     string responseForTransaction(vector<ResultT> results);
+    bool isTransaction(string xml);
 };
 
 #endif

@@ -9,26 +9,32 @@
 using namespace std;
 using namespace pqxx;
 
-class Transact {
+class Transact
+{
 private:
     Database db;
-    market mkt = market(db); 
+    market mkt = market(db);
+
 public:
     ResultT openOrder(string account_id, string stock_id, string amount, string limit, string trans_id);
     ResultT cancelOrder(string trans_id);
     ResultT queryOrder(string trans_id);
     bool checkAccount(string account_id);
-    void sentStock(string account_id, string stock_id, double amount){
+    void sentStock(string account_id, string stock_id, double amount)
+    {
         return mkt.sentStock(account_id, stock_id, amount);
     }
-    void sentMoney(string account_id, double amount){
+    void sentMoney(string account_id, double amount)
+    {
         return mkt.sentMoney(account_id, amount);
     }
 };
 
-class Creation {
+class Creation
+{
 private:
     Database db;
+
 public:
     ResultC createAccount(string account_id, string balance);
     ResultC createStock(string sym, string account_id, double amount);

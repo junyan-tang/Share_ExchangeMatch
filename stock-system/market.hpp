@@ -16,7 +16,6 @@ public:
     void sentStock(string account_id, string stock_id, double amount);
     void sentMoney(string account_id, double amount);
     map<string, vector<Order>> convertToMap(const vector<Order>& orders);
-
     string get_time();
     void print_orders();
 };

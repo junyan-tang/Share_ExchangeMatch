@@ -11,7 +11,8 @@
 using namespace std;
 using namespace pqxx;
 
-class Database{
+class Database
+{
 public:
     connection *C = root_connection;
     void drop_table();
@@ -26,8 +27,8 @@ public:
 
     void update_account(string account_id, double balance);
     void update_stock(string stock_id, string account_id, double num);
-    void update_sell_order(string stock_id, string account_id, double num, double price,string timestamp);
-    void update_buy_order(string stock_id, string account_id, double num, double price,string timestamp);
+    void update_sell_order(string stock_id, string account_id, double num, double price, string timestamp);
+    void update_buy_order(string stock_id, string account_id, double num, double price, string timestamp);
     void update_transaction(string trans_id, string account_id, string stock_id, double num, double price, string status);
     void update_transaction(string trans_id, string timestamp, string status, double price);
     void update_transaction(string trans_id, string timestamp, string status);

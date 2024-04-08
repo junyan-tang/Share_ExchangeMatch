@@ -11,12 +11,13 @@
 #include <vector>
 
 #include "parser.hpp"
-    #include "threadpool.hpp"
+#include "threadpool.hpp"
 
 using namespace std;
 #define PORT "12345"
 
-class Server{
+class Server
+{
 private:
     Threadpool pool;
     XMLParser parser;
@@ -28,21 +29,13 @@ private:
     struct sockaddr_storage their_addr;
     socklen_t sin_size;
 
-
-
 public:
     Server();
     void run();
     void process();
     string recv_request(int new_fd);
-    void handle_create(ResultC res);
-    void handle_transaction(ResultT res);
-    
 
     ~Server();
-
-
-
 };
 
 #endif // SERVER_HPP
