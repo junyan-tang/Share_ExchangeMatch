@@ -19,7 +19,7 @@ using namespace std;
 class Server
 {
 private:
-    Threadpool pool;
+    threadpool pool;
     XMLParser parser;
     Database db;
     int server_sockfd;
@@ -32,7 +32,7 @@ private:
 public:
     Server();
     void run();
-    void process();
+    void process(int new_fd);
     string recv_request(int new_fd);
 
     ~Server();

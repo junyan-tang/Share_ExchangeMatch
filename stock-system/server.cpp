@@ -1,6 +1,6 @@
 #include "server.hpp"
 #include "parser.hpp"
-
+  #include <functional>
 Server::Server() : pool(10)
 {
   memset(&host, 0, sizeof(host));
@@ -49,14 +49,7 @@ Server::Server() : pool(10)
   }
 };
 
-void Server::run()
-{
-  while (true)
-  {
-    cout << "watting for connection" << endl;
-    process();
-  }
-}
+
 
 string Server::recv_request(int socket_fd)
 {
@@ -100,36 +93,46 @@ string Server::recv_request(int socket_fd)
   return data;
 }
 
-void Server::process()
+void Server::run()
 {
-  sin_size = sizeof(their_addr);
-  int new_fd = accept(server_sockfd, (struct sockaddr *)&their_addr, &sin_size);
 
-  if (new_fd == -1)
+
+  while (true)
   {
-    cerr << "Error: accept fail" << endl;
-    exit(EXIT_FAILURE);
-  }
+    cout << "watting for connection" << endl;
+    sin_size = sizeof(their_addr);
+    int new_fd = accept(server_sockfd, (struct sockaddr *)&their_addr, &sin_size);
 
-  pool.enqueue([this, new_fd]
-               {
-
-    while(true){
-      string data = recv_request(new_fd);
-      if (data == "receive length failed") {
-        cout << "Client disconnected. Closing connection." << endl;
-        break;
-      }
-      cout << "receive data in server: " << data << endl; 
-      XMLParser parser;
-      string re = parser.parseRequest(data);
-
-      
-      cout << "here is response: " << re << endl;
-      send(new_fd, re.c_str(), re.length(), 0);
-
+    if (new_fd == -1)
+    {
+      cerr << "Error: accept fail" << endl;
+      exit(EXIT_FAILURE);
     }
-    close(new_fd); });
+    auto processFunc = std::bind(&Server::process, this, new_fd);
+    pool.commit(processFunc);
+  }
+}
+
+void Server::process(int new_fd)
+{
+
+
+
+
+  string data = recv_request(new_fd);
+
+  cout << "receive data in server: " << data << endl; 
+  XMLParser parser;
+  
+  string re = parser.parseRequest(data);
+
+  
+  cout << "here is response: " << re << endl;
+  send(new_fd, re.c_str(), re.length(), 0);
+
+    
+  close(new_fd); 
+
 }
 
 Server::~Server()

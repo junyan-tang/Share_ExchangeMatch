@@ -1,9 +1,12 @@
 #include "business.hpp"
 #include <chrono>
 #include <ctime>
+#include <mutex>
+std::mutex mtx;
 
 ResultC Creation::createAccount(string account_id, string balance)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     result R = db.inquire_account(account_id);
     ResultC res;
     double curr_balance = stod(balance);
@@ -25,6 +28,7 @@ ResultC Creation::createAccount(string account_id, string balance)
 
 ResultC Creation::createStock(string sym, string account_id, double amount)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     result account = db.inquire_account(account_id);
     ResultC res;
     if (account.size() == 0)
@@ -51,6 +55,7 @@ ResultC Creation::createStock(string sym, string account_id, double amount)
 
 ResultT Transact::openOrder(string account_id, string sym, string amount, string limit, string trans_id)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     ResultT res;
     vector<Transaction> trans_history;
     double shares = stod(amount);
@@ -105,6 +110,7 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
 
 ResultT Transact::cancelOrder(string trans_id)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
@@ -149,6 +155,7 @@ ResultT Transact::cancelOrder(string trans_id)
 
 ResultT Transact::queryOrder(string trans_id)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     result R = db.inquire_transaction(trans_id);
     ResultT res;
     vector<Transaction> trans_history;
@@ -170,6 +177,7 @@ ResultT Transact::queryOrder(string trans_id)
 
 bool Transact::checkAccount(string account_id)
 {
+    std::lock_guard<std::mutex> lck (mtx);
     result R = db.inquire_account(account_id);
     if (R.size() == 0)
     {
