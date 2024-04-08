@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++11 -g -Wall
 LDFLAGS = -lpthread -lpqxx -lpugixml
 
-CLIENT_SRCS = client.cpp
+CLIENT_SRCS = client.cpp threadpool.hpp
 
 TARGETS = client
 

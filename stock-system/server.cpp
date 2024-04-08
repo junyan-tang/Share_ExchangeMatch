@@ -53,13 +53,14 @@ void Server::run()
 {
   while (true)
   {
-    cout << "watting for connection" << endl;
+    cout << "waiting for connection" << endl;
     process();
   }
 }
 
 string Server::recv_request(int socket_fd)
 {
+  cout << "start recv request" << endl;
   const int bufferSize = 1024;
   char buffer[bufferSize];
   memset(buffer, 0, bufferSize);
@@ -79,7 +80,6 @@ string Server::recv_request(int socket_fd)
   }
 
   size_t expectedLength = stoull(lengthStr);
-  cout << "Expected length: " << expectedLength << endl;
 
   string data;
   size_t totalBytesReceived = 0;
@@ -108,20 +108,28 @@ void Server::process()
   if (new_fd == -1)
   {
     cerr << "Error: accept fail" << endl;
-    exit(EXIT_FAILURE);
+    return;
   }
 
   pool.enqueue([this, new_fd]
                {
-    int a = 0;
-    while(a < 10){
-      cout << "this is times: " << a << endl;
+   
+    while(true){
       string data = recv_request(new_fd);
+
+
+      if (data == "receive length failed") {
+        cout << "Client disconnected. Closing connection." << endl;
+        break;
+      }
       cout << "receive data in server: " << data << endl; 
+
       XMLParser parser;
       string re = parser.parseRequest(data);
-      cout << "here is response: " << re << endl;
-      a += 1;
+      // cout << "here is response: " << re << endl;
+
+      send(new_fd, re.c_str(), re.size(), 0);
+
     }
     close(new_fd); });
 }

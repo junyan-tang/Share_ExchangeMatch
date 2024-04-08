@@ -15,6 +15,16 @@
 #include <thread>
 #include <time.h>
 #include <unistd.h>
+#include <vector>
+#include <future> // Include the necessary header file
+#include "threadpool.hpp"
+std::string resize_data(std::string data){
+
+    size_t dataLength = data.length();
+    data = std::to_string(dataLength) + "\n" + data;
+    return data;
+}
+
 
 // Change MAX_THREAD to increase or decrease the number of queries sent
 #define MAX_THREAD 1
@@ -25,104 +35,184 @@ struct ThreadArgs {
     std::string server_addr;
     std::string server_port;
     std::string file_path;
+    int thread_id;
 };
-
-// Handler function to set up the client and start sending message to server
-void *handler(void *arguments) {
-    char buffer[BUFF_SIZE];
-    int server_sfd;
-    struct addrinfo hints, *server_info;
-
-    // Cast argument back to correct type
+void* threadHandler(void* arguments) {
     ThreadArgs* args = static_cast<ThreadArgs*>(arguments);
-    std::string server_addr = args->server_addr;
-    std::string server_port = args->server_port;
+    int sockfd;
+    struct addrinfo hints, *servinfo, *p;
+    int rv;
+    char buffer[BUFF_SIZE];
 
-    memset(&hints, 0, sizeof(hints));
+    memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    
-    int status = getaddrinfo(server_addr.c_str(), server_port.c_str(), &hints, &server_info);
-    if (status != 0) {
-        std::cerr << "getaddrinfo: " << gai_strerror(status) << '\n';
+
+    if ((rv = getaddrinfo(args->server_addr.c_str(), args->server_port.c_str(), &hints, &servinfo)) != 0) {
+        std::cerr << "getaddrinfo: " << gai_strerror(rv) << "\n";
         return nullptr;
     }
 
-    // Create socket
-    server_sfd = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-    if (server_sfd < 0) {
-        perror("socket");
+    // Loop through all the results and connect to the first we can
+    for(p = servinfo; p != NULL; p = p->ai_next) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+            perror("client: socket");
+            continue;
+        }
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
+            perror("client: connect");
+            continue;
+        }
+
+        break; // If we get here, we must have connected successfully
+    }
+
+    if (p == NULL) {
+        std::cerr << "client: failed to connect\n";
         return nullptr;
     }
 
-    // Connect to the server
-    status = connect(server_sfd, server_info->ai_addr, server_info->ai_addrlen);
-    if (status < 0) {
-        perror("connect");
-        close(server_sfd);
-        return nullptr;
-    }
+    freeaddrinfo(servinfo); // All done with this structure
 
-    // Read XML file content to send
+    // Read the file content
     std::ifstream fs(args->file_path);
     std::stringstream ss;
-    std::string req;
-
     if (fs.is_open()) {
-        ss << fs.rdbuf(); // Read the entire file
-        req = ss.str(); // Get the string from stringstream
+        ss << fs.rdbuf();
     } else {
-        std::cerr << "Could not open file: " << args->file_path << '\n';
-        close(server_sfd);
+        std::cerr << "Unable to open file: " << args->file_path << "\n";
         return nullptr;
     }
 
-    // Prefix the request with its length
-    std::string prefix = std::to_string(req.length()) + "\n";
-    req = prefix + req;
 
-    // Send the request
-    send(server_sfd, req.c_str(), req.size(), 0);
+
+    std::string msg = ss.str();
+
+    msg = resize_data(msg);
+    std::cout << "send message" << endl;
+    int len = send(sockfd, msg.c_str(), msg.size(), 0);
+
+
+    if (len == -1) {
+        perror("send");
+        close(sockfd);
+        return nullptr;
+    }
 
     // Receive the response
-    recv(server_sfd, buffer, BUFF_SIZE, 0);
+    len = recv(sockfd, buffer, sizeof(buffer), 0);
+    if (len == -1) {
+        perror("recv");
+        close(sockfd);
+        return nullptr;
+    }
 
-    // Close the socket
-    close(server_sfd);
-    
-    // Free the server_info structure
-    freeaddrinfo(server_info);
-    
+    // Print out the buffer content
+    std::cout << "Thread " << args->thread_id << " received: " << std::string(buffer, len) << "\n";
+
+    close(sockfd); // Close the socket
+
     return nullptr;
 }
 
+void serializedExecution(const std::string& server_addr, const std::string& server_port, const std::string& file_path, int num_threads) {
+    std::vector<double> elapsedTimes;
+    std::ofstream result_file("serialized_results.txt", std::ios::out); 
+
+
+    for (int i = 0; i < num_threads; ++i) {
+        result_file << "serialize" << i + 1;
+        if (i < num_threads - 1) result_file << ",";
+    }
+    result_file << "\n";
+
+    for (int i = 0; i < num_threads; ++i) {
+        ThreadArgs* args = new ThreadArgs{server_addr, server_port, file_path, i};
+
+        auto start = std::chrono::high_resolution_clock::now();
+        std::cout << "begin thread " << i << std::endl;
+        threadHandler(args); 
+        auto end = std::chrono::high_resolution_clock::now();
+
+        std::chrono::duration<double> elapsed = end - start;
+        elapsedTimes.push_back(elapsed.count());
+    }
+
+
+    for (auto& time : elapsedTimes) {
+        result_file << time;
+        if (&time != &elapsedTimes.back()) result_file << ",";
+    }
+    result_file << "\n";
+    result_file.close();
+}
+void concurrentExecution(const std::string& server_addr, const std::string& server_port, const std::string& file_path, int num_threads) {
+    std::vector<std::future<double>> futures;
+    std::vector<double> elapsedTimes;
+    Threadpool pool(num_threads); 
+
+    std::ofstream result_file("concurrent_results.txt", std::ios::out); 
+
+
+    for (int i = 0; i < num_threads; ++i) {
+        result_file << "concurrent" << i + 1;
+        if (i < num_threads - 1) result_file << ",";
+    }
+    result_file << "\n";
+
+    for (int i = 0; i < num_threads; ++i) {
+        futures.push_back(pool.enqueue([server_addr, server_port, file_path, i]() -> double {
+            auto start = std::chrono::high_resolution_clock::now();
+            ThreadArgs args = {server_addr, server_port, file_path, i};
+            threadHandler(&args); 
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            return elapsed.count();
+        }));
+    }
+
+    for (auto& future : futures) {
+        double time = future.get();
+        elapsedTimes.push_back(time);
+    }
+
+
+    for (auto& time : elapsedTimes) {
+        result_file << time;
+        if (&time != &elapsedTimes.back()) result_file << ",";
+    }
+    result_file << "\n";
+    result_file.close();
+}
+
 int main(int argc, char **argv) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <server_address> <server_port> <file_path>\n";
+    if (argc != 5) {
+        std::cerr << "Usage: " << argv[0] << " <server_address> <server_port> <file_path> <num_threads>\n";
         return 1;
     }
 
-    // Extract server info and file path from arguments
     std::string server_addr = argv[1];
     std::string server_port = argv[2];
     std::string file_path = argv[3];
+    int num_threads = std::stoi(argv[4]);
 
-    // Thread setup
-    pthread_t threads[MAX_THREAD];
-    ThreadArgs args = {server_addr, server_port, file_path};
 
-    // Create threads to send messages
-    for (int i = 0; i < MAX_THREAD; ++i) {
-        if (pthread_create(&threads[i], NULL, handler, &args)) {
-            std::cerr << "Failed to create thread " << i << '\n';
-        }
-        usleep(1000); // Sleep for thread setup
-    }
+    auto serialized_start = std::chrono::high_resolution_clock::now();
+    std::cout << "begin serialized execution\n" << std::endl;
+    serializedExecution(server_addr, server_port, file_path, num_threads);
+    auto serialized_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> serialized_elapsed = serialized_end - serialized_start;
+    std::cout << "Total serialized time: " << serialized_elapsed.count() << " seconds\n";
 
-    // Join threads
-    for (int i = 0; i < MAX_THREAD; ++i) {
-        pthread_join(threads[i], NULL);
-    }
+
+    // auto concurrent_start = std::chrono::high_resolution_clock::now();
+    // concurrentExecution(server_addr, server_port, file_path, num_threads);
+    // auto concurrent_end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> concurrent_elapsed = concurrent_end - concurrent_start;
+    // std::cout << "Total concurrent time: " << concurrent_elapsed.count() << " seconds\n";
 
     return 0;
 }
+
