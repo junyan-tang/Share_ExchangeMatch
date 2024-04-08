@@ -116,9 +116,6 @@ void Server::run()
 void Server::process(int new_fd)
 {
 
-
-  int a = 0;
-
   string data = recv_request(new_fd);
 
   cout << "receive data in server: " << data << endl; 
@@ -128,8 +125,7 @@ void Server::process(int new_fd)
   
   
   cout << "here is response: " << re << endl;
-  // send(new_fd, re.c_str(), re.length(), 0);
-  a+= 1;
+  send(new_fd, re.c_str(), re.length(), 0);
 
   
 
