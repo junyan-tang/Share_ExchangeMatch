@@ -29,8 +29,29 @@ void send_data(int sockfd, const string& data) {
 
 void test1(int sockfd){
 
+    string data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<create>\n"
+            "   <account id=\"123456\" balance=\"1000000\"/>\n"
+            "   <account id=\"223456\" balance=\"1000000\"/>\n"
+            "   <account id=\"323456\" balance=\"1000000\"/>\n"
+            "   <account id=\"423456\" balance=\"1000000\"/>\n"
+            "   <account id=\"523456\" balance=\"1000000\"/>\n"
+            "   <account id=\"623456\" balance=\"1000000\"/>\n"
+            "   <account id=\"723456\" balance=\"1000000\"/>\n"
+            "   <symbol sym=\"SPY\">\n"
+            "       <account id=\"123456\">10000</account>\n"
+            "       <account id=\"223456\">10000</account>\n"
+            "       <account id=\"323456\">10000</account>\n"
+            "       <account id=\"423456\">10000</account>\n"
+            "       <account id=\"523456\">10000</account>\n"
+            "       <account id=\"623456\">10000</account>\n"
+            "       <account id=\"723456\">10000</account>\n"
+            "   </symbol>\n"
+            "</create>\n";
 
- 
+    data = resize_data(data);
+    send_data(sockfd, data);
+    cout << data << "\n======" << endl; 
 
     
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -257,8 +278,10 @@ int main(int argc, char *argv[]) {
     }
 
 
+    
 
-    test3(sockfd);
+
+    test1(sockfd);
 
     close(sockfd);
     freeaddrinfo(res);

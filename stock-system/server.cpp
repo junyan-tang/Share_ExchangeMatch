@@ -116,18 +116,25 @@ void Server::run()
 void Server::process(int new_fd)
 {
 
-  string data = recv_request(new_fd);
 
-  cout << "receive data in server: " << data << endl; 
-  XMLParser parser;
-  
-  string re = parser.parseRequest(data);
-  
-  
-  cout << "here is response: " << re << endl;
-  send(new_fd, re.c_str(), re.length(), 0);
+  int a = 0;
+  while(a<10){
+    string data = recv_request(new_fd);
 
-  
+    cout << "receive data in server: " << data << endl; 
+    XMLParser parser;
+    
+    string re = parser.parseRequest(data);
+    
+    
+    cout << "here is response: " << re << endl;
+    send(new_fd, re.c_str(), re.length(), 0);
+    a += 1;
+
+
+  }
+
+
 
 
 
