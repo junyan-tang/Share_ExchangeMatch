@@ -113,15 +113,21 @@ void Server::process()
 
   pool.enqueue([this, new_fd]
                {
-    int a = 0;
-    while(a < 10){
-      cout << "this is times: " << a << endl;
+
+    while(true){
       string data = recv_request(new_fd);
+      if (data == "receive length failed") {
+        cout << "Client disconnected. Closing connection." << endl;
+        break;
+      }
       cout << "receive data in server: " << data << endl; 
       XMLParser parser;
       string re = parser.parseRequest(data);
+
+      
       cout << "here is response: " << re << endl;
-      a += 1;
+      send(new_fd, re.c_str(), re.length(), 0);
+
     }
     close(new_fd); });
 }
