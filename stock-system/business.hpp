@@ -21,14 +21,14 @@ public:
     ResultT cancelOrder(string trans_id);
     ResultT queryOrder(string trans_id);
     bool checkAccount(string account_id);
-    void sentStock(string account_id, string stock_id, double amount)
-    {
-        return mkt.sentStock(account_id, stock_id, amount);
-    }
-    void sentMoney(string account_id, double amount)
-    {
-        return mkt.sentMoney(account_id, amount);
-    }
+    // void sentStock(string account_id, string stock_id, double amount)
+    // {
+    //     return mkt.sentStock(account_id, stock_id, amount);
+    // }
+    // void sentMoney(string account_id, double amount)
+    // {
+    //     return mkt.sentMoney(account_id, amount);
+    // }
 };
 
 class Creation
