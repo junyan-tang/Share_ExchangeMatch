@@ -27,6 +27,42 @@ void send_data(int sockfd, const string& data) {
     }
 }
 
+string recv_data(int sockfd) {
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+    string data;
+    ssize_t bytesReceived;
+
+
+    bytesReceived = recv(sockfd, buffer, bufferSize, 0);
+    if (bytesReceived <= 0) {
+        cerr << "Error: recv failed" << endl;
+        return "";
+    }
+    data.append(buffer, bytesReceived);
+
+
+    size_t pos = data.find("\n");
+    if (pos != string::npos) {
+        size_t expectedLength = stoull(data.substr(0, pos));
+        data = data.substr(pos + 1); 
+
+
+    while (data.size() < expectedLength) {
+        size_t bytesToRead = std::min(static_cast<size_t>(bufferSize), expectedLength - data.size());
+        bytesReceived = recv(sockfd, buffer, bytesToRead, 0);
+            if (bytesReceived <= 0) {
+                cerr << "Error: recv failed during message reception" << endl;
+                return "";
+            }
+            data.append(buffer, bytesReceived);
+        }
+    }
+
+    return data;
+}
+
+
 
 void test(int sockfd){
         string data;
@@ -144,6 +180,10 @@ void test(int sockfd){
 
     send_data(sockfd, data8);
     cout << data8 << "\n======" << endl;
+
+    while(true){
+        
+    }
 
 
 }
