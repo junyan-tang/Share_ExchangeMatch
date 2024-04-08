@@ -1,3 +1,0 @@
-/Users/zxg/University/Graduate/ECE568/ECE568_project/project4/Share_ExchangeMatch/cmake-build-release/CMakeFiles/CMakeScratch/TryCompile-TvH7ik/CMakeFiles/cmTC_bffd7.dir
-/Users/zxg/University/Graduate/ECE568/ECE568_project/project4/Share_ExchangeMatch/cmake-build-release/CMakeFiles/CMakeScratch/TryCompile-TvH7ik/CMakeFiles/edit_cache.dir
-/Users/zxg/University/Graduate/ECE568/ECE568_project/project4/Share_ExchangeMatch/cmake-build-release/CMakeFiles/CMakeScratch/TryCompile-TvH7ik/CMakeFiles/rebuild_cache.dir

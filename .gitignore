@@ -1,9 +1,7 @@
 # Ignore Gradle project-specific cache directory
 cmake-build-debug
+cmake-build-release
 CMakeLists.txt
-.idea
-
-# Ignore Gradle build output directory
 
 # Ignore backup and lock files
 *~
@@ -15,3 +13,6 @@ CMakeLists.txt
 # Ignore intelliJ setting
 .idea/misc.xml
 .idea/modules.xml
+.idea
+
+
