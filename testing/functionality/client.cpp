@@ -372,13 +372,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-<<<<<<< HEAD
+
 
 
     test5(sockfd);
-=======
-    test(sockfd);
->>>>>>> 696abeebb98ae7e4689be7734120674fb166965e
+
 
     close(sockfd);
     freeaddrinfo(res);
