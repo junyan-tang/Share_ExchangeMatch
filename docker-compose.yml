@@ -1,25 +1,31 @@
-version: '2'
-
+version: '3'
 services:
-  stock_db:
-    image: postgres
+  db:
+    image: postgres:latest
     environment:
       POSTGRES_PASSWORD: passw0rd
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
     volumes:
-      - ./init_sql:/docker-entrypoint-initdb.d
-    expose:
-      - "5432"
+      - postgres-data:/var/lib/postgresql/data
     ports:
-      - "54321:5432"
+      - "5432:5432"
 
-  server:
-    build: ./stock-system
-    command: ./service
-    volumes:
-      - ./stock-system:/code
-    expose:
-      - "12345"
+  stock-system:
+    build:
+      context: ./stock-system
+      dockerfile: Dockerfile
+    depends_on:
+      - db
     ports:
       - "12345:12345"
-    depends_on:
-      - stock_db
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=passw0rd
+      - DB_NAME=postgres
+    entrypoint: ["/usr/local/bin/wait-for-db.sh", "db", "5432", "--"]
+    command: ["./service"] 
+
+volumes:
+  postgres-data:

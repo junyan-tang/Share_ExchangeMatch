@@ -6,7 +6,9 @@
 int main()
 {
 
-    root_connection = new connection("dbname=postgres user=postgres password=passw0rd");
+    root_connection = new connection("dbname=postgres user=postgres password=passw0rd host=db port=5432");
+
+    // root_connection = new connection("dbname=postgres user=postgres password=passw0rd");
 
 
     if (root_connection->is_open())
@@ -22,8 +24,9 @@ int main()
     Database db;
 
     db.init_database();
-
-    Server server;
+    
+    Server server; 
+    cout << "Server is running ..." << endl;
 
     server.run();
 }
