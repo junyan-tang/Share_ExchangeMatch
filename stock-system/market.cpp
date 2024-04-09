@@ -4,7 +4,6 @@
 #include <ctime>
 #include <mutex>
 
-
 std::mutex mtx2;
 
 void market::print_orders()
@@ -46,150 +45,119 @@ map<string, vector<Order>> market::convertToMap(const vector<Order> &orders)
 Transaction market::match_sell()
 {
     Transaction transaction;
-    std::lock_guard<std::mutex> lck (mtx2);
+    std::lock_guard<std::mutex> lck(mtx2);
     update_orders();
 
-
-    try{
-
-        work W(*C);
-        for (auto &sell_pair : sell_orders)
+    work W(*C);
+    for (auto &sell_pair : sell_orders)
+    {
+        auto &stock_sell_orders = sell_pair.second;
+        auto sell_it = stock_sell_orders.begin();
+        while (sell_it != stock_sell_orders.end())
         {
-            auto &stock_sell_orders = sell_pair.second;
-            auto sell_it = stock_sell_orders.begin();
-            while (sell_it != stock_sell_orders.end())
+            vector<Order> &waitlist = buy_orders[sell_it->stock_id];
+            sort(waitlist.begin(), waitlist.end(), [](const Order &a, const Order &b)
+                 { return a.order_time < b.order_time; });
+
+            auto buy_it = waitlist.begin();
+            while (buy_it != waitlist.end() && sell_it->num > 0)
             {
-                vector<Order> &waitlist = buy_orders[sell_it->stock_id];
-                sort(waitlist.begin(), waitlist.end(), [](const Order &a, const Order &b)
-                    { return a.order_time < b.order_time; });
 
-                auto buy_it = waitlist.begin();
-                while (buy_it != waitlist.end() && sell_it->num > 0)
+                if (buy_it->price >= sell_it->price)
                 {
-
-                    if (buy_it->price >= sell_it->price)
+                    int match_quantity = min(buy_it->num, sell_it->num);
+                    double match_price;
+                    if (stoi(sell_it->order_time) < stoi(buy_it->order_time))
                     {
-                        int match_quantity = min(buy_it->num, sell_it->num);
-                        double match_price;
-                        if (stoi(sell_it->order_time) < stoi(buy_it->order_time))
-                        {
-                            match_price = sell_it->price;
-                        }
-                        else
-                        {
-                            match_price = buy_it->price;
-                        }
-                        sentStock(W, buy_it->account_id, buy_it->stock_id, match_quantity);
-                        sentMoney(W, sell_it->account_id, match_quantity * match_price);
-
-                        sell_it->num -= match_quantity;
-                        buy_it->num -= match_quantity;
-
-                        if (buy_it->num <= 0)
-                        {
-                            string timestamp = get_time();
-                            update_transaction(W, buy_it->transaction_id, timestamp, "executed", match_price);
-                            buy_it = waitlist.erase(buy_it);
-                        }
-                        else
-                        {
-                            string timestamp = get_time();
-                            update_transaction(W, buy_it->transaction_id, buy_it->num);
-                            insert_transaction(W, buy_it->transaction_id, timestamp, buy_it->account_id, buy_it->stock_id, match_quantity, match_price, "executed");
-                            update_buy_order(W, buy_it->stock_id, buy_it->order_time, buy_it->num, buy_it->price, buy_it->account_id);
-
-                            ++buy_it;
-                        }
-                        if (sell_it->num <= 0)
-                        {
-                            string timestamp = get_time();
-                            update_transaction(W, sell_it->transaction_id, timestamp, "executed", match_price);
-                            sell_it = stock_sell_orders.erase(sell_it);
-
-                            break;
-                        }
-                        else
-                        {
-                            string timestamp = get_time();
-                            update_transaction(W, sell_it->transaction_id, -sell_it->num);
-                            insert_transaction(W, sell_it->transaction_id, timestamp, sell_it->account_id, sell_it->stock_id, -match_quantity, match_price, "executed");
-                            update_sell_order(W, sell_it->stock_id, sell_it->order_time, sell_it->num, sell_it->price, sell_it->account_id);
-                        }
+                        match_price = sell_it->price;
                     }
                     else
                     {
+                        match_price = buy_it->price;
+                    }
+                    sentStock(W, buy_it->account_id, buy_it->stock_id, match_quantity);
+                    sentMoney(W, sell_it->account_id, match_quantity * match_price);
+
+                    sell_it->num -= match_quantity;
+                    buy_it->num -= match_quantity;
+
+                    if (buy_it->num <= 0)
+                    {
+                        string timestamp = get_time();
+                        update_transaction(W, buy_it->transaction_id, timestamp, "executed", match_price);
+                        buy_it = waitlist.erase(buy_it);
+                    }
+                    else
+                    {
+                        string timestamp = get_time();
+                        update_transaction(W, buy_it->transaction_id, buy_it->num);
+                        insert_transaction(W, buy_it->transaction_id, timestamp, buy_it->account_id, buy_it->stock_id, match_quantity, match_price, "executed");
+                        update_buy_order(W, buy_it->stock_id, buy_it->order_time, buy_it->num, buy_it->price, buy_it->account_id);
                         ++buy_it;
                     }
-                }
+                    if (sell_it->num <= 0)
+                    {
+                        string timestamp = get_time();
+                        update_transaction(W, sell_it->transaction_id, timestamp, "executed", match_price);
+                        sell_it = stock_sell_orders.erase(sell_it);
 
-                if (sell_it != stock_sell_orders.end())
+                        break;
+                    }
+                    else
+                    {
+                        string timestamp = get_time();
+                        update_transaction(W, sell_it->transaction_id, -sell_it->num);
+                        insert_transaction(W, sell_it->transaction_id, timestamp, sell_it->account_id, sell_it->stock_id, -match_quantity, match_price, "executed");
+                        update_sell_order(W, sell_it->stock_id, sell_it->order_time, sell_it->num, sell_it->price, sell_it->account_id);
+                    }
+                }
+                else
                 {
-                    ++sell_it;
+                    ++buy_it;
                 }
             }
+
+            if (sell_it != stock_sell_orders.end())
+            {
+                ++sell_it;
+            }
         }
-
-        W.commit();
-
-    }catch(const exception & e){
-        
     }
-    
 
+    W.commit();
     return transaction;
 }
-void market::sentStock(work & W, string account_id, string stock_id, double amount) {
-    try {
+void market::sentStock(work &W, string account_id, string stock_id, double amount)
+{
+    result res = W.exec("SELECT NUM FROM SHARE WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
 
+    double new_amount;
+    if (res.size() > 0)
+    {
 
-      
-        result res = W.exec("SELECT NUM FROM SHARE WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
-
-        double new_amount;
-        if (res.size() > 0) {
-
-            double curr_shares = res[0][0].as<double>();
-            new_amount = curr_shares + amount;
-        } else {
-         
-            new_amount = amount;
-
-        }
-
-
-        W.exec("UPDATE SHARE SET NUM = " + W.quote(new_amount) + " WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id));
-
-
-    } catch (const std::exception &e) {
-        cerr << "Exception in sentStock: " << e.what() << endl;
-
+        double curr_shares = res[0][0].as<double>();
+        new_amount = curr_shares + amount;
     }
+    else
+    {
+
+        new_amount = amount;
+    }
+
+    W.exec("UPDATE SHARE SET NUM = " + W.quote(new_amount) + " WHERE SHAREID = " + W.quote(stock_id) + " AND ACCOUNT_ID = " + W.quote(account_id));
 }
 
-void market::sentMoney(work & W, string account_id, double amount) {
-    try {
+void market::sentMoney(work &W, string account_id, double amount)
+{
+    result res = W.exec("SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
 
-
-        result res = W.exec("SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID = " + W.quote(account_id) + " FOR UPDATE");
-
-        if (res.size() > 0) {
-
-            double balance = res[0][0].as<double>();
-            double new_balance = balance + amount;
-
-
-            W.exec("UPDATE ACCOUNT SET BALANCE = " + W.quote(new_balance) + " WHERE ACCOUNT_ID = " + W.quote(account_id));
-        } else {
-
-        }
-
-    } catch (const std::exception &e) {
-        cerr << "Exception in sentMoney: " << e.what() << endl;
-
+    if (res.size() > 0)
+    {
+        double balance = res[0][0].as<double>();
+        double new_balance = balance + amount;
+        W.exec("UPDATE ACCOUNT SET BALANCE = " + W.quote(new_balance) + " WHERE ACCOUNT_ID = " + W.quote(account_id));
     }
 }
-
-
 
 string market::get_time()
 {
@@ -199,28 +167,24 @@ string market::get_time()
     return timestamp;
 }
 
-void market::update_transaction(work & W, string trans_id, string timestamp, string status, double price)
+void market::update_transaction(work &W, string trans_id, string timestamp, string status, double price)
 {
     string sql = "UPDATE TRANSACTION SET STATUS = '" + status + "', TIME = '" + timestamp +
-                    "', PRICE = " + to_string(price) +
-                    " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
+                 "', PRICE = " + to_string(price) +
+                 " WHERE TRANSACTION_ID = '" + trans_id + "' AND STATUS = 'open';";
 
-  
     W.exec(sql);
-
 }
 
-void market::update_transaction(work & W, string tran_id, double num)
+void market::update_transaction(work &W, string tran_id, double num)
 {
     string sql = "UPDATE TRANSACTION SET NUM = " + to_string(num) +
-                    " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
+                 " WHERE TRANSACTION_ID = '" + tran_id + "' AND STATUS = 'open';";
 
     W.exec(sql);
-
-
 }
 
-void market::insert_transaction(work & W, string trans_id, string timestamp, string account_id, string stock_id, double num, double price, string status)
+void market::insert_transaction(work &W, string trans_id, string timestamp, string account_id, string stock_id, double num, double price, string status)
 {
     string sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, TIME, ACCOUNT_ID, STOCK_ID, NUM, PRICE, STATUS) VALUES ('" +
                  trans_id + "', '" +
@@ -232,23 +196,22 @@ void market::insert_transaction(work & W, string trans_id, string timestamp, str
                  status + "');";
 
     W.exec(sql);
-
 }
 
-void market::update_sell_order(work & W, string stock_id, string account_id, double num, double price, string timestamp)
+void market::update_sell_order(work &W, string stock_id, string account_id, double num, double price, string timestamp)
 {
     string sql = "UPDATE SELL_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
- 
-    W.exec(sql);
+                                                                                                                                      "WHERE STOCK_ID = '" +
+                 stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
 
+    W.exec(sql);
 }
 
-void market::update_buy_order(work&  W, string stock_id, string account_id, double num, double price, string timestamp)
+void market::update_buy_order(work &W, string stock_id, string account_id, double num, double price, string timestamp)
 {
     string sql = "UPDATE BUY_ORDER SET NUM = " + to_string(num) + ", PRICE = " + to_string(price) + ", ORDER_TIME = '" + timestamp + "' "
-                "WHERE STOCK_ID = '" + stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
+                                                                                                                                     "WHERE STOCK_ID = '" +
+                 stock_id + "' AND ACCOUNT_ID = '" + account_id + "';";
 
     W.exec(sql);
-
 }

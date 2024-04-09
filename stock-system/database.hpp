@@ -16,8 +16,6 @@ class Database
 public:
     connection *C = root_connection;
 
-
-
     void drop_table();
     void create_table();
     void init_database();
