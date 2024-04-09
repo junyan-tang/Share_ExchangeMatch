@@ -30,53 +30,33 @@ void send_data(int sockfd, const string &data)
     }
 }
 
-string recv_data(int sockfd)
-{
-    char buffer[8192];
-    memset(buffer, 0, sizeof(buffer));
+void test1(int sockfd){
 
-    ssize_t bytesReceived = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived == -1)
-    {
-        cerr << "Error: recv failed" << endl;
-        return ""; // Error handling
-    }
-    else if (bytesReceived == 0)
-    {
-        cerr << "Connection closed" << endl;
-        return "";
-    }
+    string data =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<create>\n"
+            "   <account id=\"123456\" balance=\"1000000\"/>\n"
+            "   <account id=\"223456\" balance=\"1000000\"/>\n"
+            "   <account id=\"323456\" balance=\"1000000\"/>\n"
+            "   <account id=\"423456\" balance=\"1000000\"/>\n"
+            "   <account id=\"523456\" balance=\"1000000\"/>\n"
+            "   <account id=\"623456\" balance=\"1000000\"/>\n"
+            "   <account id=\"723456\" balance=\"1000000\"/>\n"
+            "   <symbol sym=\"SPY\">\n"
+            "       <account id=\"123456\">10000</account>\n"
+            "       <account id=\"223456\">10000</account>\n"
+            "       <account id=\"323456\">10000</account>\n"
+            "       <account id=\"423456\">10000</account>\n"
+            "       <account id=\"523456\">10000</account>\n"
+            "       <account id=\"623456\">10000</account>\n"
+            "       <account id=\"723456\">10000</account>\n"
+            "   </symbol>\n"
+            "</create>\n";
 
-    buffer[bytesReceived] = '\0';
-    string re = string(buffer);
-    cout << "this is response: " << re << endl;
-    return re;
-}
+    data = resize_data(data);
+    send_data(sockfd, data);
+    cout << data << "\n======" << endl; 
 
-void test(int sockfd)
-{
-    string data;
-
-    data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-           "<create>\n"
-           "   <account id=\"123456\" balance=\"1000000\"/>\n"
-           "   <account id=\"223456\" balance=\"1000000\"/>\n"
-           "   <account id=\"323456\" balance=\"1000000\"/>\n"
-           "   <account id=\"423456\" balance=\"1000000\"/>\n"
-           "   <account id=\"523456\" balance=\"1000000\"/>\n"
-           "   <account id=\"623456\" balance=\"1000000\"/>\n"
-           "   <account id=\"723456\" balance=\"1000000\"/>\n"
-           "   <symbol sym=\"SPY\">\n"
-           "       <account id=\"123456\">10000</account>\n"
-           "       <account id=\"223456\">10000</account>\n"
-           "       <account id=\"323456\">10000</account>\n"
-           "       <account id=\"423456\">10000</account>\n"
-           "       <account id=\"523456\">10000</account>\n"
-           "       <account id=\"623456\">10000</account>\n"
-           "       <account id=\"723456\">10000</account>\n"
-           "   </symbol>\n"
-           "</create>\n";
-
+    
     string data1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                    "<transactions id=\"123456\">\n"
                    "<order sym=\"SPY\" amount=\"300\" limit=\"125\"/>\n"
@@ -373,10 +353,10 @@ int main(int argc, char *argv[])
     }
 
 
+    
 
 
-    test5(sockfd);
-
+    test1(sockfd);
 
     close(sockfd);
     freeaddrinfo(res);

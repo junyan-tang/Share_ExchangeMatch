@@ -32,8 +32,7 @@ void Database::create_table()
            "NUM NUMERIC NOT NULL,"
            "PRICE NUMERIC NOT NULL,"
            "ORDER_TIME TEXT,"
-           "TRANSACTION_ID TEXT NOT NULL,"
-           "PRIMARY KEY (ACCOUNT_ID, STOCK_ID));";
+           "TRANSACTION_ID TEXT NOT NULL);";
 
     sql += "CREATE TABLE BUY_ORDER("
            "STOCK_ID TEXT NOT NULL,"
@@ -41,8 +40,7 @@ void Database::create_table()
            "NUM NUMERIC NOT NULL,"
            "PRICE NUMERIC NOT NULL,"
            "ORDER_TIME TEXT,"
-           "TRANSACTION_ID TEXT NOT NULL,"
-           "PRIMARY KEY (ACCOUNT_ID, STOCK_ID));";
+           "TRANSACTION_ID TEXT NOT NULL);";
 
     sql += "CREATE TABLE TRANSACTION("
            "TRANSACTION_ID TEXT NOT NULL,"
@@ -147,6 +145,63 @@ void Database::update_transaction(work &W, string trans_id, string account_id, s
     cout << "this is sql: " << sql << endl;
 
     W.exec(sql);
+}
+ResultT Database::open_sell_order(string account_id, string sym, double amount, double limit, string trans_id){
+    work W(*C);
+    string inquire_stock_sql = "SELECT * FROM SHARE WHERE SHAREID = '" + sym + "' AND ACCOUNT_ID = '" + account_id + "';";
+    result R1(W.exec(inquire_stock_sql));
+    string timestamp = get_time();
+
+    if (R1.size() == 0 || R1.begin()[3].as<double>() < abs(amount))
+    {
+        return {account_id, "order", trans_id, sym, "error", "Not enough shares", {}};
+    }
+    string insert_sell_order_sql = "INSERT INTO SELL_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
+                                   "VALUES ('" + sym + "', '" + account_id + "', " + to_string(abs(amount)) + ", " + to_string(limit) + ", '" + timestamp + "', " + trans_id + ");";
+    W.exec(insert_sell_order_sql);
+    string update_stock_sql = "UPDATE SHARE SET NUM = " + to_string(R1.begin()[3].as<double>() - abs(amount)) + " WHERE SHAREID = '" + sym + "' AND ACCOUNT_ID = '" + account_id + "';";
+    W.exec(update_stock_sql);
+    string insert_transaction_sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, TIME, ACCOUNT_ID, STOCK_ID, NUM, PRICE, STATUS) VALUES ('" +
+                 trans_id + "', '" +
+                 timestamp + "', '" +
+                 account_id + "', '" +
+                 sym + "', " +
+                 to_string(amount) + ", " +
+                 to_string(limit) + ", 'open');";
+    W.exec(insert_transaction_sql);
+    W.commit();
+    return {account_id, "order", trans_id, sym, "success", "", {}};
+
+}
+
+ResultT Database::open_buy_order(string account_id, string sym, double shares, double price, string trans_id){
+    work W(*C);
+    string inquire_account_sql = "SELECT * FROM ACCOUNT WHERE ACCOUNT_ID = '" + account_id + "';";
+    result R1(W.exec(inquire_account_sql));
+    string timestamp = get_time();
+    double balance = R1.begin()[1].as<double>();
+    double money = shares * price;
+    if (balance > money) {
+        string insert_buy_order_sql = "INSERT INTO BUY_ORDER (STOCK_ID, ACCOUNT_ID, NUM, PRICE, ORDER_TIME, TRANSACTION_ID) "
+                                   "VALUES ('" + sym + "', '" + account_id + "', " + to_string(shares) + ", " + to_string(price) + ", '" + timestamp + "', " + trans_id + ");";
+        W.exec(insert_buy_order_sql);
+        string update_account_sql = "UPDATE ACCOUNT SET BALANCE = " + to_string(balance - money) + " WHERE ACCOUNT_ID = '" + account_id + "';";
+        W.exec(update_account_sql);
+        string insert_transaction_sql = "INSERT INTO TRANSACTION (TRANSACTION_ID, TIME, ACCOUNT_ID, STOCK_ID, NUM, PRICE, STATUS) VALUES ('" +
+                                        trans_id + "', '" +
+                                        timestamp + "', '" +
+                                        account_id + "', '" +
+                                        sym + "', " +
+                                        to_string(shares) + ", " +
+                                        to_string(price) + ", 'open');";
+        W.exec(insert_transaction_sql);
+        W.commit();
+        return {account_id, "order", trans_id, sym, "success", "", {}};
+    }
+    else{
+        return  {account_id, "order", trans_id, sym, "error", "Not enough balance", {}};
+    }
+
 }
 
 void Database::update_transaction(work &W, string trans_id, string timestamp, string status)
@@ -281,4 +336,12 @@ vector<Order> Database::retrieve_buy_order()
         res.push_back(curr);
     }
     return res;
+}
+
+string Database::get_time()
+{
+    auto now = std::chrono::system_clock::now();
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    std::string timestamp = std::to_string(now_sec);
+    return timestamp;
 }
