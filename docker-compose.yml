@@ -5,7 +5,9 @@ services:
     restart: always
     image: postgres
     environment:
-      POSTGRES_PASSWORD: passw0rd
+      - POSTGRES_DB=stock
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=passw0rd
 
     volumes:
       - ./stock-system/sql_init:/docker-entrypoint-initdb.d
