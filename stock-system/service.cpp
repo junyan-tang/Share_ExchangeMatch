@@ -6,9 +6,8 @@
 int main()
 {
 
-    root_connection = new connection("dbname=postgres user=postgres password=passw0rd host=db port=5432");
 
-    // root_connection = new connection("dbname=postgres user=postgres password=passw0rd");
+    root_connection = new connection("dbname=postgres user=postgres password=passw0rd host=db port=5432");
 
 
     if (root_connection->is_open())
