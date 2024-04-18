@@ -94,18 +94,17 @@ ResultT Transact::openOrder(string account_id, string sym, string amount, string
 
     try {
     
-        if (shares < 0) { // 处理卖单
+        if (shares < 0) { 
             res = db.open_sell_order(account_id, sym, shares, price, trans_id);
-        } else if (shares > 0) { // 处理买单
+        } else if (shares > 0) { 
             res = db.open_buy_order(account_id, sym, shares, price, trans_id);
         }
     } catch (const std::exception& e) {
         cerr << "Transaction failed: " << e.what() << endl;
-        // 这里可能需要根据异常类型决定是否回滚事务
         res = {account_id, "order", trans_id, sym, "error", "Transaction failed", trans_history};
     }
     res.transaction = trans_history;
-    mkt.match_sell(); // 这个方法需要在事务外执行，并且也需要处理并发问题
+    mkt.match_sell();
     return res;
 }
 
