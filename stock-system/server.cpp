@@ -49,8 +49,6 @@ Server::Server() : pool(10)
   }
 };
 
-
-
 string Server::recv_request(int socket_fd)
 {
   const int bufferSize = 1024;
@@ -73,7 +71,6 @@ string Server::recv_request(int socket_fd)
 
   size_t expectedLength = stoull(lengthStr);
 
-
   string data;
   size_t totalBytesReceived = 0;
   while (totalBytesReceived < expectedLength)
@@ -95,8 +92,6 @@ string Server::recv_request(int socket_fd)
 
 void Server::run()
 {
-
-
   while (true)
   {
     sin_size = sizeof(their_addr);
@@ -107,22 +102,15 @@ void Server::run()
       cerr << "Error: accept fail" << endl;
       exit(EXIT_FAILURE);
     }
-
-
-
     pool.enqueue([this, new_fd] {
       process(new_fd);
     });
-    // auto processFunc = std::bind(&Server::process, this, new_fd);
-    // pool.commit(processFunc);
   }
 }
 
 
 void Server::process(int new_fd)
 {
-
-
   int a = 0;
   while(a<10){
     string data = recv_request(new_fd);
@@ -130,23 +118,12 @@ void Server::process(int new_fd)
     cout << "receive data in server: " << data << endl; 
     XMLParser parser;
     
-    string re = parser.parseRequest(data);
-    
-    
+    string re = parser.parseRequest(data);   
     cout << "here is response: " << re << endl;
     send(new_fd, re.c_str(), re.length(), 0);
     a += 1;
-
-
   }
-
-
-
-
-
-    
-  close(new_fd); 
-
+  close(new_fd);
 }
 
 Server::~Server()
